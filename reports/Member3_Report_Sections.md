@@ -1,7 +1,7 @@
-# Phase 1 Project Report Sections — Member 3 (GMM Model Owner)
+# Phase 1 GMM Report Draft
 ## AML + DL Project: Card Fraud Triage via Gaussian Mixture Density Scoring
 
-**Author:** Member 3 (GMM Model Owner — Core Machine Learning)  
+**Section Owner:** GMM Modeling  
 **Target Format:** IEEE Two-Column / LaTeX Ready  
 **Assigned Report Sections:**
 1. *Literature Review: Gaussian Mixture Models, EM Algorithm, and Density-Based Anomaly Detection*

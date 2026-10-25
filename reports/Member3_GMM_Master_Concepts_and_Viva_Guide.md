@@ -1,15 +1,7 @@
-# Member 3: GMM Model Owner — Master Concept, Implementation & Viva Voce Guide
-### Complete Theoretical, Practical & Oral Exam Reference for AI-Assisted Mastery
+# Gaussian Mixture Model Technical Reference
+### Theoretical and Implementation Reference
 **Project:** Card Fraud Triage via Gaussian Mixture Density Scoring (Phase 1 — Machine Learning)  
-**Author / Role:** Member 3 — Core Machine Learning & GMM Model Owner  
 **Repository:** `Card-Fraud-Triage-ML-DL`
-
----
-
-## 🤖 System Prompt for AI Tutors (Paste this document into ChatGPT / Claude / Gemini)
-
-> **Prompt to copy-paste into any AI:**  
-> *"You are an exacting Professor of Applied Machine Learning and Probability Theory conducting a rigorous Viva Voce oral examination for an AML + DL Master's course. Below is the complete project reference document authored by the student (Member 3: GMM Model Owner). Your objective is to thoroughly test, drill, and teach me all concepts in this document. Ask me tough, multi-part viva questions one by one. Probe my understanding of the EM algorithm step-by-step, the mathematical derivation of AIC vs BIC penalties, the geometric instability of covariance matrices in 29 dimensions, the exact role of `reg_covar`, and why negative log-likelihood is a valid anomaly score. If my answer is incomplete or mathematically imprecise, correct me and explain the concept using the exact formulations and intuitions provided below."*
 
 ---
 
@@ -21,15 +13,14 @@
 5. [Concept 4: Covariance Topologies & High-Dimensional Geometry](#5-concept-4-covariance-topologies--high-dimensional-geometry)
 6. [Concept 5: Unsupervised Anomaly Scoring via Negative Log-Likelihood](#6-concept-5-unsupervised-anomaly-scoring-via-negative-log-likelihood)
 7. [Concept 6: Numerical Stability, Covariance Singularity & `reg_covar`](#7-concept-6-numerical-stability-covariance-singularity--reg_covar)
-8. [Member 3 Implementation Walkthrough (Code & Engineering)](#8-member-3-implementation-walkthrough-code--engineering)
-9. [Official Viva Voce Defense: Questions, Model Answers & Examiner Traps](#9-official-viva-voce-defense-questions-model-answers--examiner-traps)
-10. [Theoretical Limitations & The Bridge to Phase 2 (Autoencoders)](#10-theoretical-limitations--the-bridge-to-phase-2-autoencoders)
+8. [Implementation Walkthrough](#8-implementation-walkthrough)
+9. [Theoretical Limitations and the Bridge to Phase 2](#9-theoretical-limitations-and-the-bridge-to-phase-2)
 
 ---
 
 # 1. Master Glossary of Concepts & Terminology
 
-| Concept / Keyword | Formal Mathematical Definition | Plain English / Intuitive Meaning | Role in Member 3 Work |
+| Concept / Keyword | Formal Mathematical Definition | Plain English / Intuitive Meaning | Role in the Project |
 |---|---|---|---|
 | **Gaussian Mixture Model (GMM)** | $p(\mathbf{x}) = \sum_{k=1}^K \pi_k \mathcal{N}(\mathbf{x} \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)$ | A weighted sum of $K$ different Gaussian bell curves representing distinct behavioral modes. | The core unsupervised model used to estimate legitimate transaction density. |
 | **Mixing Coefficient ($\pi_k$)** | Prior probability $\pi_k = P(z=k)$ with $\sum_{k=1}^K \pi_k = 1, \pi_k \ge 0$. | The proportion of the total population that belongs to cluster $k$. | Estimated in M-step as $N_k / N$. |
@@ -43,7 +34,7 @@
 | **Monotonicity Property** | $\ln p(\mathbf{X} \mid \boldsymbol{\theta}^{(t+1)}) \ge \ln p(\mathbf{X} \mid \boldsymbol{\theta}^{(t)})$. | Likelihood is mathematically guaranteed never to decrease between EM iterations. | Guarantees stable convergence without tuning learning rates or step sizes. |
 | **AIC (Akaike Info Criterion)** | $\text{AIC} = 2p - 2\ln \hat{L}$. | Penalizes model complexity with a fixed penalty of $2$ per parameter. | Swept across $k=2\dots15$; overfits in large sample sizes. |
 | **BIC (Bayesian Info Criterion)** | $\text{BIC} = p \ln(N) - 2\ln \hat{L}$. | Penalizes model complexity with $\ln(N)$ per parameter ($\approx 12.2$ for $N \approx 200k$). | Primary criterion for model selection; enforces parsimony and prevents overfitting. |
-| **Parsimony (Occam's Razor)** | Preferring the simplest model that adequately explains the empirical data. | Not adding complex components unless they provide a substantial return in fit. | Justification for choosing $k=3$ or $k=4$ over higher $k$. |
+| **Parsimony (Occam's Razor)** | Preferring the simplest model that adequately explains the empirical data. | Not adding complex components unless they provide a substantial return in fit. | Supports component selection alongside BIC and stability diagnostics. |
 | **Elbow Point / Inflection** | Point where the rate of marginal log-likelihood gain ($\Delta \text{LL}$) levels off. | The point of diminishing returns where adding another Gaussian yields negligible gain. | Used alongside minimum BIC to select optimal $k^*$. |
 | **Full Covariance (`full`)** | Unconstrained $D \times D$ symmetric positive-definite matrix for each component. | Clusters can have any ellipsoidal shape, tilt, and orientation in 29-D space. | Captures correlations among features; requires regularizer to prevent collapse. |
 | **Diagonal Covariance (`diag`)** | Diagonal matrix $\boldsymbol{\Sigma}_k = \text{diag}(\sigma_1^2, \dots, \sigma_D^2)$. | Clusters are axis-aligned ellipsoids; assumes features are conditionally independent. | Highly stable; $O(D)$ parameter scaling. |
@@ -274,14 +265,14 @@ Where:
 
 ---
 
-# 8. Member 3 Implementation Walkthrough (Code & Engineering)
+# 8. Implementation Walkthrough
 
 ### Architecture in `notebooks/Card_Fraud_Triage_Phase1.ipynb`:
 
 ```mermaid
 graph TD
-    A["Clean Preprocessed Splits (M1 & M2)"] --> B["Filter Legit Training Data: X_train[y_train==0]"]
-    B --> C["Model Selection Sweep: k = 2 ... 15 (M3 & M4)"]
+    A["Clean Preprocessed Splits"] --> B["Filter Legitimate Training Data: X_train[y_train==0]"]
+    B --> C["Model Selection Sweep: k = 2 ... 15"]
     C --> D["Compute AIC, BIC, Log-Likelihood & Plot Curves"]
     D --> E["Justify Optimal k* (BIC min + Elbow + Stability)"]
     E --> F["Fit Production GMM (k*, full, reg_covar=1e-6) on 100% Legit-Train"]
@@ -289,10 +280,10 @@ graph TD
     G --> H["Compute Anomaly Scores: score = -gmm.score_samples(X)"]
     H --> I["Plot Score Distributions (Legit vs Fraud on Val & Test)"]
     I --> J["Export Artifacts: gmm_model.joblib, gmm_scores_val.csv, gmm_scores_test.csv"]
-    J --> K["Handoff to Member 5 (Evaluation & Threshold Triage)"]
+    J --> K["Evaluation and Threshold Triage"]
 ```
 
-### Key Engineering Safeguards in Our Code:
+### Key Engineering Safeguards
 1. **Strict Data Leakage Prevention:**
    - Filter `X_train_legit = X_train[y_train == 0]`.
    - Never pass `y_train == 1` into GMM `.fit()`.
@@ -307,87 +298,7 @@ graph TD
 
 ---
 
-# 9. Official Viva Voce Defense: Questions, Model Answers & Examiner Traps
-
-### Viva Question 1: Explain the EM algorithm step-by-step. Why does a GMM give a probability density?
-
-#### Ideal Model Answer:
-> *"A Gaussian Mixture Model models the probability density of an observation $\mathbf{x}$ as a convex combination of $K$ multivariate Gaussian densities: $p(\mathbf{x}) = \sum_{k=1}^K \pi_k \mathcal{N}(\mathbf{x} \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)$.  
-> It gives a mathematically valid probability density because:  
-> 1) It is non-negative everywhere, as mixing weights $\pi_k \ge 0$ and normal densities are strictly positive.  
-> 2) It integrates to exactly 1 over $\mathbb{R}^D$ because each Gaussian integrates to 1, and the mixing weights sum to 1 ($\sum \pi_k = 1$).  
->  
-> We cannot fit this model with standard analytical maximum likelihood because the sum over $K$ is inside the logarithm of the marginal likelihood, preventing closed-form derivatives.  
->  
-> The Expectation-Maximization (EM) algorithm by Dempster et al. (1977) solves this using an unobserved indicator variable $\mathbf{z}_i$:  
-> - **Initialization:** Initialize means (using k-means), covariances (identity), and weights ($1/K$).  
-> - **E-Step (Expectation):** Use Bayes' theorem to compute the posterior responsibility $\gamma_{ik}$—the probability that Gaussian $k$ generated transaction $i$ under current parameters:  
->   $$\gamma_{ik} = \frac{\pi_k^{(t)} \mathcal{N}(\mathbf{x}_i \mid \boldsymbol{\mu}_k^{(t)}, \boldsymbol{\Sigma}_k^{(t)})}{\sum_j \pi_j^{(t)} \mathcal{N}(\mathbf{x}_i \mid \boldsymbol{\mu}_j^{(t)}, \boldsymbol{\Sigma}_j^{(t)})}$$  
-> - **M-Step (Maximization):** Update parameters analytically by maximizing the expected complete-data log-likelihood ($Q$-function):  
->   - Effective weight: $N_k = \sum_i \gamma_{ik}$  
->   - New weight: $\pi_k^{(t+1)} = N_k / N$  
->   - New mean: $\boldsymbol{\mu}_k^{(t+1)} = \frac{1}{N_k} \sum_i \gamma_{ik} \mathbf{x}_i$  
->   - New covariance: $\boldsymbol{\Sigma}_k^{(t+1)} = \frac{1}{N_k} \sum_i \gamma_{ik} (\mathbf{x}_i - \boldsymbol{\mu}_k^{(t+1)}) (\mathbf{x}_i - \boldsymbol{\mu}_k^{(t+1)})^T$  
-> - **Convergence:** Dempster et al. proved that observed log-likelihood increases monotonically at every step ($\Delta \ell \ge 0$) until the change drops below tolerance."*
-
-#### ⚠️ Examiner Follow-Up Trap:
-- **Trap:** *"Does the EM algorithm guarantee finding the global maximum likelihood?"*
-- **Correct Answer:** *"No! EM guarantees convergence only to a **local stationary point** (local maximum or saddle point) of the likelihood surface. That is why we set `n_init = 3` with different random seeds to initialize from multiple points and select the solution with the highest converged lower bound."*
-
----
-
-### Viva Question 2: AIC vs BIC — formulas, how the penalty differs, why BIC penalises complexity more.
-
-#### Ideal Model Answer:
-> *"The formulas are:  
-> - $\text{AIC} = 2p - 2\ln \hat{L}$  
-> - $\text{BIC} = p \ln(N) - 2\ln \hat{L}$  
-> where $\hat{L}$ is the maximized likelihood, $p$ is the number of free parameters, and $N$ is sample size.  
->  
-> The difference lies entirely in the complexity penalty:  
-> AIC penalizes complexity with a fixed factor of $2 \times p$, independent of sample size.  
-> BIC penalizes complexity with $\ln(N) \times p$, which scales logarithmically with sample size.  
->  
-> In our dataset, we train on $N \approx 199,000$ legitimate transactions. Therefore:  
-> $$\ln(199,000) \approx 12.20$$  
-> The penalty ratio is:  
-> $$\frac{\text{BIC penalty}}{\text{AIC penalty}} = \frac{\ln(N)}{2} \approx \frac{12.20}{2} = 6.10$$  
-> BIC penalizes every single added parameter more than $6\times$ harsher than AIC.  
->  
-> **Why this matters:**  
-> AIC was derived from minimizing predictive KL divergence. In large datasets, the $2p$ penalty is too weak compared to the $O(N)$ likelihood gain, so AIC continually adds components and overfits to noise. BIC was derived from Bayesian marginal likelihood and is dimensionally consistent: as $N \to \infty$, it converges to the true parsimonious model. Hence, we use BIC minimum and the elbow curve for model selection."*
-
-#### ⚠️ Examiner Follow-Up Trap:
-- **Trap:** *"If BIC was minimum at $k=8$ by a tiny margin, would you pick $k=8$?"*
-- **Correct Answer:** *"No. We do not follow 'lowest number wins'. In 29 dimensions, each extra component adds 465 parameters. If $k=8$ is only marginally lower than $k=4$, Occam's razor and numerical stability favor $k=4$ because fewer components maintain higher degrees of freedom per covariance matrix and prevent high-dimensional singularity."*
-
----
-
-### Viva Question 3: Why can a GMM become unstable in high dimensions? (Covariance singularity, curse of dimensionality)
-
-#### Ideal Model Answer:
-> *"A GMM faces two severe challenges in high dimensions ($D=29$):  
-> 1. **Covariance Singularity:** In 29 dimensions, a full covariance matrix requires estimating $\frac{D(D+1)}{2} = 435$ parameters per component. If a component attracts too few data points, or if points in that cluster lie along a lower-dimensional manifold (high multicollinearity), the empirical covariance matrix becomes rank-deficient: its smallest eigenvalue $\lambda_{\min} \to 0$, its determinant $|\boldsymbol{\Sigma}_k| \to 0$, and inverting it blows up to infinity ($\boldsymbol{\Sigma}_k^{-1} \to \infty$).  
-> 2. **Curse of Dimensionality (The Soap Bubble Effect):** In 29 dimensions, space is exponentially vast. Multivariate Gaussian probability mass does not sit in the center around the mean; it concentrates in a thin spherical shell at distance $r \approx \sqrt{D}$ from the center. Furthermore, distance concentration causes the ratio between nearest and farthest points to contract toward 1, making normal points and mild anomalies look almost equidistant from cluster centers."*
-
----
-
-### Viva Question 4: Why is −log-likelihood a valid anomaly score? What does `reg_covar` do?
-
-#### Ideal Model Answer:
-> *"Negative log-likelihood $-\ln p(\mathbf{x})$ is a valid anomaly score because:  
-> 1. **Inverse Density Relationship:** We train our GMM strictly on legitimate transactions. Common legitimate transactions fall in dense, high-probability regions of feature space where $p(\mathbf{x})$ is high, producing a low $-\ln p(\mathbf{x})$. Fraudulent transactions violate legitimate patterns, falling in sparse, low-density regions where $p(\mathbf{x}) \to 0^+$, driving $-\ln p(\mathbf{x})$ toward $+\infty$.  
-> 2. **Strict Monotonicity:** Because $-\ln(u)$ is strictly decreasing, lower probability density translates directly and monotonically into a higher anomaly score.  
-> 3. **Underflow Prevention:** Raw 29-D probabilities are on the order of $10^{-50}$, which underflow standard float64 registers to 0.0. The negative logarithm converts these infinitesimal densities into well-behaved positive numbers like $25.0$ or $120.0$.  
->  
-> **What `reg_covar` does:**  
-> `reg_covar = 1e-6` adds a small positive constant $\epsilon$ to the diagonal of every covariance matrix:  
-> $$\tilde{\boldsymbol{\Sigma}}_k = \boldsymbol{\Sigma}_k + \epsilon \mathbf{I}$$  
-> This performs Tikhonov regularization. It shifts every eigenvalue $\lambda_i \to \lambda_i + \epsilon$, guaranteeing that $\lambda_{\min} \ge \epsilon > 0$. This ensures the determinant is strictly non-zero, bounds the condition number, and mathematically guarantees the covariance matrix is always invertible, preventing singular matrix crashes."*
-
----
-
-# 10. Theoretical Limitations & The Bridge to Phase 2 (Autoencoders)
+# 9. Theoretical Limitations and the Bridge to Phase 2
 
 ### Why is GMM Not Enough for Real-World Banking?
 1. **Convex Gaussian Manifold Limitation:** Human spending behavior follows non-linear, topological manifolds (e.g. spiral spending velocities, temporal bursts). A GMM tries to approximate non-linear manifolds using a collection of convex, elliptical blobs, which requires too many components and leads to singularity.

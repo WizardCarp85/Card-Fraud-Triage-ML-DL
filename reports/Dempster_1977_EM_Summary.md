@@ -1,6 +1,6 @@
 # Dempster, Laird, and Rubin (1977)
 ## "Maximum Likelihood from Incomplete Data via the EM Algorithm"
-### 1-Page Executive & Technical Summary for Team Teaching and Viva Voce
+### Executive and Technical Summary
 
 **Full Citation:**  
 Dempster, A. P., Laird, N. M., & Rubin, D. B. (1977). *Maximum Likelihood from Incomplete Data via the EM Algorithm.* **Journal of the Royal Statistical Society: Series B (Methodological)**, 39(1), 1–38. (Discussion: pp. 22–37).
@@ -85,9 +85,5 @@ flowchart LR
 
 ---
 
-### 6. Team Teaching Cheat-Sheet (How to Explain EM in 2 Minutes)
-> *"Imagine a classic chicken-and-egg problem:  
-> If we knew which cluster each card transaction belonged to, finding each Gaussian's mean and covariance would be trivial — just compute sample mean and sample covariance of each group.  
-> Conversely, if we already knew each Gaussian's mean and covariance, assigning transactions to clusters would be trivial — just use Bayes' rule.  
-> But we know neither!  
-> Dempster et al. solved this by guessing the parameters first, using them in the **E-step** to make soft probabilistic assignments of transactions to clusters, and then using those assignments in the **M-step** to re-estimate the Gaussian parameters. Repeating this loop is mathematically proven to improve the model fit at every iteration until it settles into a stable optimum."*
+### 6. Practical Interpretation of EM
+EM resolves the dependency between unknown component assignments and unknown Gaussian parameters by alternating between two steps. The E-step computes soft component assignments from the current parameters, and the M-step re-estimates the parameters from those assignments. Each iteration does not decrease the observed-data likelihood and converges to a stationary point.

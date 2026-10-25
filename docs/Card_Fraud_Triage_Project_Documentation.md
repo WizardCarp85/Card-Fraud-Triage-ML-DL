@@ -168,15 +168,15 @@ No GPU is needed for Phase 1 — GMM runs on CPU. If full-covariance GMM gets sl
 
 | Member | Role Title | Owns (Main Responsibility) |
 |---|---|---|
-| **Member 1** | **Team Lead + Dataset & EDA Owner** | Coordination, GitHub, dataset, EDA, chronological split |
-| **Member 2** | **Feature Engineering & Preprocessing Owner** | Cleaning, transforms, scaling, leakage prevention |
-| **Member 3** | **GMM Model Owner (Core ML)** | GMM theory (EM, AIC/BIC), model training, density scoring |
-| **Member 4** | **Model Experiments & Robustness Owner** | k-sweep support, covariance comparison, ablation studies, stability checks |
-| **Member 5** | **Evaluation, Threshold Analysis & Reporting Owner** | Metrics, PR curves, threshold/triage analysis, LaTeX report & slides assembly |
+| **Yash** | **Team Lead + Dataset & EDA Owner** | Coordination, GitHub, dataset, EDA, chronological split |
+| **Saksham** | **Feature Engineering & Preprocessing Owner** | Cleaning, transforms, scaling, leakage prevention |
+| **Rudra** | **GMM Model Owner (Core ML)** | GMM theory (EM, AIC/BIC), model training, density scoring |
+| **Abhigya** | **Model Experiments & Robustness Owner** | k-sweep support, covariance comparison, ablation studies, stability checks |
+| **Somraj** | **Evaluation, Threshold Analysis & Reporting Owner** | Metrics, PR curves, threshold/triage analysis, LaTeX report & slides assembly |
 
 ---
 
-## Member 1 — Team Lead + Dataset & EDA Owner
+## Yash — Team Lead + Dataset & EDA Owner
 
 **Responsibilities:**
 - Create & manage the GitHub repo, folder structure, README; ensure all 5 members commit regularly **under their own names** (individual contribution is assessed).
@@ -195,7 +195,7 @@ No GPU is needed for Phase 1 — GMM runs on CPU. If full-covariance GMM gets sl
 
 ---
 
-## Member 2 — Feature Engineering & Preprocessing Owner
+## Saksham — Feature Engineering & Preprocessing Owner
 
 **Responsibilities:**
 - Data cleaning: duplicates decision, outlier inspection for `Amount`.
@@ -214,7 +214,7 @@ No GPU is needed for Phase 1 — GMM runs on CPU. If full-covariance GMM gets sl
 
 ---
 
-## Member 3 — GMM Model Owner (Phase 1 Core)
+## Rudra — GMM Model Owner (Phase 1 Core)
 
 **Responsibilities:**
 - Own the theory write-up (**Notebook Section 5**, in markdown): mixture density formula, **EM algorithm** (E-step responsibilities, M-step parameter updates), AIC/BIC formulas, covariance types, why low log-likelihood = anomaly.
@@ -235,7 +235,7 @@ No GPU is needed for Phase 1 — GMM runs on CPU. If full-covariance GMM gets sl
 
 ---
 
-## Member 4 — Model Experiments & Robustness Owner
+## Abhigya — Model Experiments & Robustness Owner
 
 **Responsibilities:**
 - Run the **covariance-type comparison** (`full`, `diag`, `tied`, `spherical`) — metrics + training time + stability (warnings/singularity) — and recommend the final configuration with reasoning.
@@ -259,7 +259,7 @@ No GPU is needed for Phase 1 — GMM runs on CPU. If full-covariance GMM gets sl
 
 ---
 
-## Member 5 — Evaluation, Threshold Analysis & Reporting Owner
+## Somraj — Evaluation, Threshold Analysis & Reporting Owner
 
 **Responsibilities:**
 - Build the **evaluation code** used for every experiment (one shared set of functions so all comparisons are fair):
@@ -410,9 +410,9 @@ Plus a **triage trade-off table** (thresholds from validation, applied to test):
 
 # 13. Out of Scope for Now (Phase 2 — Later)
 
-- ❌ Autoencoder (PyTorch) — Phase 2
-- ❌ Hybrid GMM + Autoencoder score fusion — Phase 2 (bonus marks)
-- ❌ Any DL code in the Phase 1 notebook
+- Autoencoder (PyTorch) — Phase 2
+- Hybrid GMM + Autoencoder score fusion — Phase 2 (bonus marks)
+- Any DL code in the Phase 1 notebook
 
 In Phase 1, these appear **only** as a short *Future Work* paragraph in the report/conclusion.
 
