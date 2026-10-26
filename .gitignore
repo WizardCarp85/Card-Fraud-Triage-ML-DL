@@ -1,0 +1,16 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Datasets (never commit raw dataset CSVs)
+*.csv.zip
+creditcard.csv
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+venv/
+.env

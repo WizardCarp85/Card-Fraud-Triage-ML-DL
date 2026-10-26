@@ -1,0 +1,4 @@
+Experiment,Setting,k,PR_AUC,ROC_AUC,Recall@FPR1%,Precision@500,converged,n_iter,convergence_warnings,n_params,time_sec
+Seed stability,seed=42,14,0.6260,0.9445,0.8182,0.09,True,27,0,6509,6.93
+Seed stability,seed=0,14,0.6421,0.9613,0.8182,0.09,True,48,0,6509,11.73
+Seed stability,seed=7,14,0.4247,0.9523,0.8182,0.09,True,34,0,6509,8.63

@@ -162,10 +162,31 @@ Due to the extreme rarity of fraud, evaluation centers on precision-recall dynam
 | **Recall @ FPR $\alpha$** | $\text{TPR}$ when $\text{FPR} \le \alpha \quad (\alpha \in \{0.1\%, 1.0\%, 5.0\%\})$ | Quantifies fraud capture rate when false alarm volume is capped by a strict operational budget. |
 | **Precision @ Top-$K$** | $\frac{\text{True Frauds in Top-}K}{K} \quad (K \in \{100, 500, 1000\})$ | Measures hit-rate efficiency for analyst queues under fixed daily investigation capacities. |
 
-### Operational Triage Decision Table Structure
-Thresholds are set on the validation set at fixed review capacity constraints and evaluated on the holdout test set:
+### 6.1 Empirical Evaluation Results (Holdout Test Set)
 
-$$\text{Review Capacity } (K) \implies \text{Fraud Caught (Recall)} \quad \vert \quad \text{Precision} \quad \vert \quad \text{False Positive Alarms}$$
+Performance benchmarks comparing the production GMM ($K=14$, `full` covariance) against random guessing baselines on the untouched test partition:
+
+| Model / Split | PR-AUC | ROC-AUC | Recall @ FPR 0.1% | Recall @ FPR 1.0% | Recall @ FPR 5.0% | Precision @ 100 | Precision @ 500 | Precision @ 1000 |
+|---|---|---|---|---|---|---|---|---|
+| **Validation Set** | **0.6510** | 0.9474 | 65.45% | 80.00% | 89.09% | 32.00% | 8.80% | 4.80% |
+| **Holdout Test Set** | **0.6432** | 0.9512 | 63.46% | 80.77% | 88.46% | 31.00% | 8.40% | 4.60% |
+| Random Guessing Baseline | 0.0012 | 0.5000 | 0.10% | 1.00% | 5.00% | 0.12% | 0.12% | 0.12% |
+
+*(Detailed serializations available in [`production_model_evaluation.csv`](file:///Users/Wizard/Documents/Projects/Working/card-fraud-triage-project26/results/tables/production_model_evaluation.csv) and [`ablation_summary.csv`](file:///Users/Wizard/Documents/Projects/Working/card-fraud-triage-project26/results/tables/ablation_summary.csv).)*
+
+### 6.2 Operational Triage Decision Table (Test Horizon)
+
+Thresholds calibrated on validation sets and projected onto test transaction review capacities:
+
+| Review Capacity (Top-$K$) | Fraud Caught (Recall %) | Total Frauds Detected | Precision (Hit Rate %) | False Alarms Generated | Base Rate Multiplier |
+|---|---|---|---|---|---|
+| **Top-100** | 59.62% | 31 / 52 | **31.00%** | 69 | **253.7×** |
+| **Top-250** | 71.15% | 37 / 52 | **14.80%** | 213 | **121.1×** |
+| **Top-500** | 80.77% | 42 / 52 | **8.40%** | 458 | **68.7×** |
+| **Top-1000** | 88.46% | 46 / 52 | **4.60%** | 954 | **37.6×** |
+| **Top-2000** | 94.23% | 49 / 52 | **2.45%** | 1,951 | **20.0×** |
+
+*(Detailed breakdown available in [`triage_capacity_tradeoffs.csv`](file:///Users/Wizard/Documents/Projects/Working/card-fraud-triage-project26/results/tables/triage_capacity_tradeoffs.csv).)*
 
 ---
 
