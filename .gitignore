@@ -14,3 +14,10 @@ __pycache__/
 .ipynb_checkpoints/
 venv/
 .env
+
+# Internal / Temporary Audit Reports & Scratch Scripts
+docs/NOTEBOOK_AUDIT_REPORT.md
+*AUDIT_REPORT*
+scratch/
+
+

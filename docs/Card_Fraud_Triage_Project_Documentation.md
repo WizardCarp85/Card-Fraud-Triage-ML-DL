@@ -1,6 +1,10 @@
 # Project 26: Card Fraud Triage
 ## Unsupervised Anomaly Detection & Density Scoring via Gaussian Mixture Models (Phase 1)
 
+**Course:** Advanced Machine Learning & Deep Learning (AML + DL)  
+**Platform:** Google Colab / Local Python 3  
+**Dataset:** Credit Card Fraud Detection (ULB / Kaggle)  
+
 ### Technical Project Documentation
 
 ---

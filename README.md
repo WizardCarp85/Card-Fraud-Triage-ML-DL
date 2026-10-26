@@ -1,8 +1,10 @@
 # Card Fraud Triage (Project 26)
 
-> **Unsupervised Anomaly Detection & Density Scoring via Gaussian Mixture Models (Phase 1)**
+> **Unsupervised Anomaly Detection & Density Scoring via Gaussian Mixture Models (Phase 1)**  
+> **Course:** Advanced Machine Learning & Deep Learning (AML + DL)
 
 An unsupervised machine learning pipeline for real-time card fraud triage, modeling the probability density of legitimate transactions and prioritizing suspicious events for analyst review via negative log-likelihood scoring.
+
 
 ---
 
