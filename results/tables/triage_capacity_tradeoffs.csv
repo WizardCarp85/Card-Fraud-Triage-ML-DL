@@ -1,6 +1,0 @@
-Review Capacity (Top-K),Frauds Caught (Recall %),Total Frauds Detected,Precision (Hit Rate %),False Alarms Generated,Base Rate Multiplier
-Top-100,59.62%,31,31.00%,69,253.7x
-Top-250,71.15%,37,14.80%,213,121.1x
-Top-500,80.77%,42,8.40%,458,68.7x
-Top-1000,88.46%,46,4.60%,954,37.6x
-Top-2000,94.23%,49,2.45%,1951,20.0x

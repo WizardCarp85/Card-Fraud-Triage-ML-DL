@@ -1,5 +1,0 @@
-Experiment,Setting,k,PR_AUC,ROC_AUC,Recall@FPR1%,Precision@500,converged,n_iter,convergence_warnings,n_params,time_sec,ExplainedVar
-PCA dims,29 (no PCA),14,0.6260,0.9445,0.8182,0.090,True,27,0,6509,6.88,NaN
-PCA dims,20 dims,14,0.0467,0.9541,0.5091,0.060,True,47,0,3233,10.36,0.9114
-PCA dims,10 dims,14,0.0114,0.9176,0.0364,0.008,True,50,0,923,7.19,0.7377
-PCA dims,5 dims,14,0.0053,0.7897,0.0000,0.002,True,26,0,293,1.62,0.5548

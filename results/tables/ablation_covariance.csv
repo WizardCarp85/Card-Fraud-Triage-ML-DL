@@ -1,5 +1,0 @@
-Experiment,Setting,k,PR_AUC,ROC_AUC,Recall@FPR1%,Precision@500,converged,n_iter,convergence_warnings,n_params,time_sec
-Covariance,full,14,0.6260,0.9445,0.8182,0.090,True,27,0,6509,7.05
-Covariance,diag,14,0.0910,0.9558,0.7273,0.082,True,66,0,825,2.10
-Covariance,tied,14,0.0797,0.9606,0.7273,0.082,True,19,0,854,3.02
-Covariance,spherical,14,0.0177,0.9387,0.0000,0.004,True,80,0,433,2.27

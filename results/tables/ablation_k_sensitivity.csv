@@ -1,8 +1,0 @@
-Experiment,Setting,k,PR_AUC,ROC_AUC,Recall@FPR1%,Precision@500,converged,n_iter,convergence_warnings,n_params,time_sec
-k sensitivity,k=2,2,0.6928,0.9547,0.8000,0.09,True,31,0,929,1.63
-k sensitivity,k=3,3,0.7515,0.9573,0.8182,0.09,True,20,0,1394,1.37
-k sensitivity,k=4,4,0.7099,0.9562,0.8182,0.09,True,21,0,1859,2.15
-k sensitivity,k=5,5,0.3648,0.9455,0.8182,0.09,True,23,0,2324,2.72
-k sensitivity,k=6,6,0.4125,0.9495,0.8182,0.09,True,22,0,2789,2.93
-k sensitivity,k=8,8,0.4077,0.9389,0.8182,0.09,True,31,0,3719,5.00
-k sensitivity,k=14,14,0.6260,0.9445,0.8182,0.09,True,27,0,6509,6.65

@@ -1,4 +1,0 @@
-Experiment,Setting,k,PR_AUC,ROC_AUC,Recall@FPR1%,Precision@500,converged,n_iter,convergence_warnings,n_params,time_sec
-reg_covar,1e-06,14,0.6260,0.9445,0.8182,0.090,True,27,0,6509,7.02
-reg_covar,1e-04,14,0.5780,0.9534,0.8000,0.088,True,47,0,6509,10.98
-reg_covar,1e-03,14,0.5251,0.9550,0.8000,0.088,True,70,0,6509,17.13

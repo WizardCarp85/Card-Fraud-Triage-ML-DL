@@ -1,3 +1,0 @@
-Split,Legit Mean,Legit Median,Legit Std,Legit 99th%,Fraud Mean,Fraud Median,Fraud Min,Median Diff (Fraud - Legit)
-Validation Set,-27.66,-18.87,38.74,55.50,342.30,223.25,-60.65,242.12
-Test Set,-28.11,-18.65,36.54,50.74,420.47,236.50,-65.30,255.16
