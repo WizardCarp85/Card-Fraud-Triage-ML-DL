@@ -21,3 +21,6 @@ docs/NOTEBOOK_AUDIT_REPORT.md
 scratch/
 
 
+
+# Rebuildable Phase 2 feature matrices
+data/artifacts/*.npz
