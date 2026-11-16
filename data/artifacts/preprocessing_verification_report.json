@@ -1,0 +1,72 @@
+{
+  "status": "PASSED",
+  "checks": {
+    "feature_count_is_29": true,
+    "feature_order_matches_contract": true,
+    "no_label_or_time_in_features": true,
+    "splits_disjoint": true,
+    "train_legit_has_no_fraud": true,
+    "train_legit_subset_of_train": true,
+    "scaler_fitted_on_legit_train_only": true,
+    "scaler_params_finite": true,
+    "train_shape_ok": true,
+    "train_dtype_float64": true,
+    "train_all_finite": true,
+    "train_row_ids_match_manifest": true,
+    "train_fraud_count_matches_manifest": true,
+    "val_shape_ok": true,
+    "val_dtype_float64": true,
+    "val_all_finite": true,
+    "val_row_ids_match_manifest": true,
+    "val_fraud_count_matches_manifest": true,
+    "test_shape_ok": true,
+    "test_dtype_float64": true,
+    "test_all_finite": true,
+    "test_row_ids_match_manifest": true,
+    "test_fraud_count_matches_manifest": true
+  },
+  "per_split": {
+    "train": {
+      "rows": 198608,
+      "fraud_rows": 366,
+      "shape_ok": true,
+      "dtype_float64": true,
+      "all_finite": true,
+      "row_ids_match_manifest": true,
+      "fraud_count_matches_manifest": true,
+      "X_sha256": "be4300ddb929bcb7173f1d2473b794ea832f60560bee53e3557f1ebfd3e6ef70",
+      "row_ids_sha256": "b90864ca64fa8991c4abc15d462512ca4390136e9f19604489d921c18de27d14"
+    },
+    "val": {
+      "rows": 42558,
+      "fraud_rows": 55,
+      "shape_ok": true,
+      "dtype_float64": true,
+      "all_finite": true,
+      "row_ids_match_manifest": true,
+      "fraud_count_matches_manifest": true,
+      "X_sha256": "a0daf8b1564787c4b2eb9164d9bd23d2696960078e9b2bd83b9efb27a4b9bbeb",
+      "row_ids_sha256": "deabfee863952c05a12672016146eb17fe789dec5e3dbbe3d909a451315415eb"
+    },
+    "test": {
+      "rows": 42560,
+      "fraud_rows": 52,
+      "shape_ok": true,
+      "dtype_float64": true,
+      "all_finite": true,
+      "row_ids_match_manifest": true,
+      "fraud_count_matches_manifest": true,
+      "X_sha256": "3ab5249266df40a81e3a332baab0202153d39f4f3b131a8e43fe19ac1f824f1b",
+      "row_ids_sha256": "21f731bd66437e2bb25a202c2086e718d681c357469d93635433bde54c78c7ad"
+    }
+  },
+  "phase1_scaler_comparison": {
+    "available": true,
+    "path": "results/scaler_robust.joblib",
+    "matches_within_tolerance": true,
+    "max_abs_center_diff": 0.0,
+    "max_abs_scale_diff": 0.0,
+    "rtol": 1e-06,
+    "atol": 1e-09
+  }
+}
