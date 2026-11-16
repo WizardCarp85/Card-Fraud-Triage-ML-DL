@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "model": "gmm",
+  "calibration_split": "validation",
+  "score_direction": "higher_is_more_suspicious",
+  "score_transform": "-GaussianMixture.score_samples(X)",
+  "selection_rule": "maximum validation recall within FPR budget; highest threshold breaks recall ties",
+  "validation_rows": 42558,
+  "validation_fraud_rows": 55,
+  "thresholds": [
+    {
+      "fpr_budget": 0.001,
+      "threshold": 143.65081901156682,
+      "validation_recall": 0.7636363636363637,
+      "validation_fpr": 0.00021174975884055244,
+      "true_positives": 42,
+      "false_positives": 9,
+      "status": "ok",
+      "decision": "score_gte_threshold",
+      "reason": null
+    },
+    {
+      "fpr_budget": 0.01,
+      "threshold": 67.95949186438423,
+      "validation_recall": 0.8,
+      "validation_fpr": 0.002376302849210644,
+      "true_positives": 44,
+      "false_positives": 101,
+      "status": "ok",
+      "decision": "score_gte_threshold",
+      "reason": null
+    },
+    {
+      "fpr_budget": 0.05,
+      "threshold": 39.18202235082998,
+      "validation_recall": 0.8727272727272727,
+      "validation_fpr": 0.032468296355551374,
+      "true_positives": 48,
+      "false_positives": 1380,
+      "status": "ok",
+      "decision": "score_gte_threshold",
+      "reason": null
+    }
+  ],
+  "provenance": {
+    "model_artifact": {
+      "path": "results/gmm_model.joblib",
+      "sha256": "5ac282181e19e97baf862599e65c8da8e88b2debf3db84f84e2762746eb03480"
+    },
+    "preprocessing_artifact": {
+      "path": "results/scaler_robust.joblib",
+      "sha256": "df06bee03c6d8e43124869b7c2c7eca8c00458d3f8bc4cb5d03245d3c964073a"
+    },
+    "split_manifest": {
+      "path": "data/split_manifest.json",
+      "sha256": "89f87ff166fd4438be88b58e77e133d3444124acb8f37f7eca1a6a123af7a7e3"
+    },
+    "validation_scores": {
+      "path": "data/scores/gmm_validation.csv",
+      "sha256": "03276204aa848b338d715125248581b5ec79348dbc0c269beda5e8b93988258e"
+    },
+    "validation_labels": {
+      "path": "data/scores/validation_labels.csv",
+      "sha256": "12e3c74b01c2ccdf3a9e94489f8b7767b34fb1ea9395d4a9e160cfe4b81fd307"
+    },
+    "validation_split_ids": {
+      "path": "data/splits/val_indices.csv",
+      "sha256": "edb3f6aa4f34b408cfbebbf93eb14407e8f8de67f5d287756583debe84c8860f"
+    },
+    "baseline_provenance": {
+      "path": "data/scores/gmm_baseline_provenance.json",
+      "sha256": "12d087b6076736c5409e8c172681a9846ab589aebc6ec57b228846c81d1cc857"
+    },
+    "calibration_code": {
+      "path": "src/threshold_calibration.py",
+      "sha256": "299c9ca1676acef290b50bd60928fc9f87dba62aaed8e356cf2f907e37c8c6a6"
+    },
+    "freeze_code": {
+      "path": "scripts/freeze_gmm_thresholds.py",
+      "sha256": "fdaf73038a306d107f8735e1f31a0d27569635335234d926ebfc4b7c218cfae7"
+    },
+    "feature_order": [
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V5",
+      "V6",
+      "V7",
+      "V8",
+      "V9",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18",
+      "V19",
+      "V20",
+      "V21",
+      "V22",
+      "V23",
+      "V24",
+      "V25",
+      "V26",
+      "V27",
+      "V28",
+      "Amount_log"
+    ],
+    "preprocessing": "V1\u2013V28, log1p(Amount), Phase 1 RobustScaler fitted on legitimate training rows"
+  }
+}
