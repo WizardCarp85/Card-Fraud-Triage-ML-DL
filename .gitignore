@@ -19,5 +19,7 @@ venv/
 docs/NOTEBOOK_AUDIT_REPORT.md
 *AUDIT_REPORT*
 scratch/
+artifacts/
+
 
 
