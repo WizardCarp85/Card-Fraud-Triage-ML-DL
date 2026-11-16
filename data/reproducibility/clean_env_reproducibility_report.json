@@ -115,7 +115,7 @@
       "loader_noise": true,
       "feature_matrices_X": true
     },
-    "reference": "/tmp/ref_report.json",
+    "reference": "data/reproducibility/reproducibility_report.json",
     "reference_environment": {
       "python": "3.9.6",
       "platform": "macOS-26.6.2-arm64-arm-64bit",

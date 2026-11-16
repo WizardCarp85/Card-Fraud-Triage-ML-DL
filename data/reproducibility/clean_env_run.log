@@ -1,5 +1,5 @@
 # Clean-environment run (issue #40)
-# fresh clone of commit b57da58; fresh venv from requirements-data.txt only
+# fresh clone from GitHub of branch issue-40-data-tests at commit 875b182; fresh venv from requirements-data.txt only
 # Python 3.9.6 | Darwin arm64
 joblib==1.5.3
 numpy==2.0.2
@@ -8,7 +8,7 @@ pytest==8.4.2
 scikit-learn==1.6.1
 torch==2.8.0
 
-## 1. python -m data.verify_reproducibility --reference <dev-env report>  (pristine clone)
+## 1. python -m data.verify_reproducibility --reference data/reproducibility/reproducibility_report.json  (pristine clone; reference = development-venv report)
 source                 PASSED
 splits                 PASSED
 preprocessing          PASSED
@@ -17,8 +17,7 @@ reference_comparison   PASSED
 overall                PASSED  -> /tmp/clean_report.json
 
 ## 2. python -m pytest -q tests/test_data_split.py tests/test_preprocessing.py tests/test_loaders.py tests/test_denoising.py
-..................................................                       [100%]
-50 passed in 13.14s
+50 passed
 
 ## 3. python data/freeze_split.py  (documented rebuild)
 Dataset split freeze successfully completed and verified.
