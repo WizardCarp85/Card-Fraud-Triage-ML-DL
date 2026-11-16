@@ -203,3 +203,12 @@ To preserve scientific validity, prevent benchmark contamination, and ensure end
 |---|---|---|---|---|
 | **Author / ML Research Engineer** | Abhigya Sachdeva | Pre-Registered | 2026-11-16 | Initial pre-registration document authored and committed prior to ablation runs. |
 | **Peer Reviewer / Team** | Team (`@WizardCarp85`) | Pending | — | Review pending formal pull request approval. |
+
+
+---
+
+## Addendum A1 — Realized AE backbone (recorded at Stage 1, Issue #35)
+Date: 2026-11-16. Recorded per the plan's change-control clause.
+
+The Section-2 hidden-activation specification (ReLU) predates the team-merged AE implementation (#32). The realized backbone uses the #32 activation stack (BatchNorm1d + LeakyReLU(0.1)) with the plan topology 29 -> 32 -> B -> 32 -> 29. All Stage-1 candidates (RUN-S1-W04/W08/W16-CLN-S42, RUN-S1-W16-DNZ-S42) and all planned Stage-2 runs use this identical realized backbone, so the fixed-backbone invariant that pre-registration protects is preserved; the within-candidate comparison remains valid and no Stage-1 re-run is required. All other Section-2 settings (MSE loss, Adam lr 1e-3, max_epochs=100, patience-10 early stopping, legitimate-only training, feature order) were followed exactly. Weight decay was 0 for Stage-1 runs (merged default 1e-5); recorded in each run's config_json.
+Author: Abhigya Sachdeva. Team sign-off: pending.

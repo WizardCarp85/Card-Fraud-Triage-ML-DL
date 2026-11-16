@@ -125,3 +125,9 @@ Under Section 4 of the frozen plan ([docs/ae_experiment_plan.md](file:///Users/A
 2. The reference baseline: **$B=8$ with clean inputs**
 
 Both models will be trained across the three pre-registered seeds: $\{0, 7, 42\}$. Final model selection will be decided strictly by the **mean validation AP** across all three seeds.
+
+
+---
+
+## Plan Deviation Note (Stage 1)
+The pre-registered plan (Section 2) specified ReLU hidden layers. The team-merged AE implementation (#32, merged after the plan froze) uses BatchNorm1d + LeakyReLU(0.1). All four Stage-1 candidates used the IDENTICAL realized backbone (29->32->B->32->29 with the #32 activation stack), so the fixed-backbone invariant holds and the within-candidate comparison remains valid. Topology, MSE loss, Adam lr 1e-3, max_epochs=100, patience-10 early stopping, denoising (sigma=0.5, training inputs only) and the Section-5 selection rule were followed exactly. Weight decay was set to 0 (merged default 1e-5); recorded in config_json. See Addendum A1 in docs/ae_experiment_plan.md.
