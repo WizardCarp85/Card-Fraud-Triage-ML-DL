@@ -39,7 +39,8 @@ def _synthetic(seed: int = 0) -> tuple[dict, dict]:
 
 
 def _collect(loader) -> tuple[torch.Tensor, torch.Tensor]:
-    xs, ids = zip(*[(x, r) for x, r in loader])
+    """Concatenate (model input, row_id) over all batches. Train batches are (x_in, x_tgt, row_id)."""
+    xs, ids = zip(*[(b[0], b[-1]) for b in loader])
     return torch.cat(xs), torch.cat(ids)
 
 
@@ -78,8 +79,9 @@ class LoaderTests(unittest.TestCase):
         b = make_autoencoder_loaders(splits, manifest, batch_size=8)
         for name, loader in b.loaders.items():
             batch = next(iter(loader))
-            self.assertEqual(len(batch), 2, name)
-            x, rid = batch
+            # train: (x_input, x_target, row_id); evaluation streams: (x, row_id). No labels.
+            self.assertEqual(len(batch), 3 if name == "train" else 2, name)
+            x, rid = batch[0], batch[-1]
             self.assertEqual(x.dtype, torch.float32)
             self.assertEqual(x.shape[1], 29)
             self.assertEqual(rid.dtype, torch.int64)
@@ -101,7 +103,7 @@ class LoaderTests(unittest.TestCase):
     def test_batch_size_is_configurable(self) -> None:
         splits, manifest = _synthetic()
         b = make_autoencoder_loaders(splits, manifest, batch_size=16)
-        self.assertEqual([len(x) for x, _ in b.loaders["train"]], [16, 16, 16, 2])
+        self.assertEqual([len(batch[0]) for batch in b.loaders["train"]], [16, 16, 16, 2])
 
     def test_invalid_inputs_are_rejected(self) -> None:
         for mutate in (
