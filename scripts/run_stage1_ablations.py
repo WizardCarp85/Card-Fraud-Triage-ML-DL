@@ -266,7 +266,7 @@ def train_and_evaluate_run(
         "start_time": start_time_iso,
         "end_time": end_time_iso,
         "runtime_s": runtime_s,
-        "epochs_run": best_epoch if early_stopped else max_epochs,
+        "epochs_run": epoch,
         "early_stopped": early_stopped,
         "final_train_loss": round(float(final_train_loss), 6),
         "val_recon_loss": round(float(best_val_recon_loss), 6),
@@ -274,7 +274,7 @@ def train_and_evaluate_run(
         "val_Precision@100": round(float(val_p100), 6),
         "val_recall_FPR1pct": round(float(val_rec_fpr1), 6),
         "val_recall_FPR5pct": round(float(val_rec_fpr5), 6),
-        "checkpoint_path": str(checkpoint_path.relative_to(Path.cwd())),
+        "checkpoint_path": str(checkpoint_path.resolve().relative_to(Path.cwd().resolve())),
         "checkpoint_sha256": checkpoint_sha256,
     }
 
