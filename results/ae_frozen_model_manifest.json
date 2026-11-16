@@ -3,7 +3,7 @@
   "model_family": "Autoencoder",
   "model_name": "Phase2_Frozen_Undercomplete_Autoencoder",
   "status": "FROZEN",
-  "author": "Abhigya Sachdeva (@Abhi)",
+  "author": "Abhigya Sachdeva (@ABHIGYA0205)",
   "governing_issue": "Issue #36 (Stage 2 Confirmation & Checkpoint Freeze)",
   "selection_rule_applied": "docs/ae_experiment_plan.md Section 5.4 (Mean Validation AP across seeds {0, 7, 42})",
   "architecture": {
