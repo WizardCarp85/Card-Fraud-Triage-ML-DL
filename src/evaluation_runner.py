@@ -22,7 +22,13 @@ def run_evaluation(
     test_indices: np.ndarray,
     config: EvaluationConfig,
     run_dir: str | Path,
+    model_name: str,
 ) -> dict[str, Any]:
+    """Execute evaluation using evaluation.py and save isolated tables and scores.
+
+    Thresholds are calibrated strictly on validation scores and evaluated on unseen test scores.
+    """
+
     """Execute evaluation using evaluation.py and save isolated tables and scores.
 
     Thresholds are calibrated strictly on validation scores and evaluated on unseen test scores.
@@ -47,9 +53,10 @@ def run_evaluation(
     # 2. Save score tables with original indices
     df_val_scores = pd.DataFrame(
         {
-            "original_index": val_indices,
+            "row_id": val_indices,
+            "split": ["validation"] * len(val_indices),
+            "model": [model_name] * len(val_indices),
             "anomaly_score": scores_val,
-            "Class": y_val,
         }
     )
     val_scores_path = scores_dir / "scores_val.csv"
@@ -57,9 +64,10 @@ def run_evaluation(
 
     df_test_scores = pd.DataFrame(
         {
-            "original_index": test_indices,
+            "row_id": test_indices,
+            "split": ["test"] * len(test_indices),
+            "model": [model_name] * len(test_indices),
             "anomaly_score": scores_test,
-            "Class": y_test,
         }
     )
     test_scores_path = scores_dir / "scores_test.csv"
