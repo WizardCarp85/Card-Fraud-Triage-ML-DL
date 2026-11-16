@@ -35,6 +35,6 @@ Shapes, float64 dtype, finite values, row-ID membership equal to the manifest, d
 - Versions used: see `environment` in `feature_metadata.json` (Python 3.9.6, numpy 2.0.2, pandas 2.3.3, scikit-learn 1.6.1, joblib 1.5.3).
 
 ## Known limitations
-- Depends on the unmerged split manifest PR (#25 / PR #46).
+- Depends on the frozen split manifest from #25 (merged).
 - The Phase 1 scaler was compared with a different serialisation environment, so comparison uses statistics, not file bytes.
 - The loader (#31) and denoising (#33) are separate issues.
