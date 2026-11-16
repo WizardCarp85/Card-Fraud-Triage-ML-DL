@@ -85,10 +85,13 @@ class GMMAnomalyModel(BaseAnomalyModel):
             "meta_path": str(meta_file),
         }
 
-    def load(self, model_dir: str | Path) -> GMMAnomalyModel:
-        """Load fitted GMM model from directory."""
-        path = Path(model_dir)
-        model_file = path / "gmm_model.joblib"
+    def load(self, model_path_or_dir: str | Path) -> GMMAnomalyModel:
+        """Load fitted GMM model from file or directory."""
+        path = Path(model_path_or_dir)
+        if path.is_file():
+            model_file = path
+        else:
+            model_file = path / "gmm_model.joblib"
         if not model_file.is_file():
             raise FileNotFoundError(f"GMM model file not found at '{model_file}'.")
         self.model = joblib.load(model_file)
