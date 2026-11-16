@@ -56,9 +56,8 @@ class EvaluationTests(unittest.TestCase):
     def test_invalid_arrays_raise_value_error(self) -> None:
         invalid_cases = [([], []), ([0, 1], [0.1]), ([0, 2], [0.1, 0.2]), ([0, 1], [0.1, np.nan])]
         for labels, scores in invalid_cases:
-            with self.subTest(labels=labels, scores=scores):
-                with self.assertRaises(ValueError):
-                    average_precision(labels, scores)
+            with self.subTest(labels=labels, scores=scores), self.assertRaises(ValueError):
+                average_precision(labels, scores)
 
     def test_invalid_k_and_fpr_budget_raise_value_error(self) -> None:
         labels = np.array([0, 1])
