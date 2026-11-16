@@ -491,3 +491,113 @@ def evaluate_final_model(
             figures / "validation_threshold_tradeoffs.png",
         )
     return result
+
+
+SCORE_COLUMNS = ("row_id", "split", "model", "anomaly_score")
+LABEL_COLUMNS = ("row_id", "split", "Class")
+
+
+def _read_contract_csv(path: str | Path, columns: tuple[str, ...]) -> pd.DataFrame:
+    """Read exact schemas, preserving lexical IDs and rejecting ambiguous headers."""
+    import csv
+
+    with Path(path).open(newline="", encoding="utf-8") as stream:
+        reader = csv.reader(stream, strict=True)
+        try:
+            header = next(reader, [])
+            if len(header) != len(columns) or set(header) != set(columns):
+                raise ValueError(f"Expected exactly these CSV columns: {columns}")
+            rows = list(reader)
+        except csv.Error as error:
+            raise ValueError("Malformed CSV file.") from error
+    if any(len(row) != len(columns) for row in rows):
+        raise ValueError("Every CSV record must match the declared schema.")
+    frame = pd.DataFrame(rows, columns=header, dtype=str)
+    if frame.empty:
+        raise ValueError("Files must contain at least one record.")
+    for column in columns:
+        values = frame[column]
+        if values.isna().any() or values.str.strip().eq("").any():
+            raise ValueError(f"{column} must not contain missing values.")
+        if not values.eq(values.str.strip()).all():
+            raise ValueError(f"{column} must not contain surrounding whitespace.")
+    if frame["row_id"].duplicated().any():
+        raise ValueError("row_id must be unique within a file.")
+    return frame
+
+
+def _check_split(frame: pd.DataFrame, expected_split: str) -> None:
+    if expected_split not in ("train", "validation", "test"):
+        raise ValueError("expected_split must be train, validation or test.")
+    if not frame["split"].eq(expected_split).all():
+        raise ValueError("File split does not match expected_split.")
+
+
+def load_anomaly_scores(
+    path: str | Path, *, expected_split: str, expected_model: str,
+    score_direction: str,
+) -> pd.DataFrame:
+    """Load one model/split score export without labels or feature columns.
+
+    Producers must explicitly declare higher_is_more_suspicious. Density/log
+    likelihood producers must negate their scores before exporting.
+    """
+    if score_direction != "higher_is_more_suspicious":
+        raise ValueError("score_direction must be higher_is_more_suspicious.")
+    if not isinstance(expected_model, str) or not expected_model.strip():
+        raise ValueError("expected_model must be a nonempty name.")
+    frame = _read_contract_csv(path, SCORE_COLUMNS)
+    _check_split(frame, expected_split)
+    if not frame["model"].eq(expected_model).all():
+        raise ValueError("File model does not match expected_model.")
+    try:
+        scores = pd.to_numeric(frame["anomaly_score"], errors="raise").astype(float)
+    except (TypeError, ValueError) as error:
+        raise ValueError("anomaly_score must be numeric.") from error
+    if not np.isfinite(scores).all():
+        raise ValueError("anomaly_score must be finite.")
+    frame["anomaly_score"] = scores
+    return frame.sort_values("row_id", kind="mergesort").reset_index(drop=True)
+
+
+def load_evaluation_labels(path: str | Path, *, expected_split: str) -> pd.DataFrame:
+    """Load separate evaluation-only labels for validation or test."""
+    if expected_split not in ("validation", "test"):
+        raise ValueError("Evaluation labels require validation or test.")
+    frame = _read_contract_csv(path, LABEL_COLUMNS)
+    _check_split(frame, expected_split)
+    if not frame["Class"].isin(("0", "1")).all():
+        raise ValueError("Class must contain binary labels 0 or 1.")
+    frame["Class"] = frame["Class"].astype(int)
+    return frame
+
+
+def evaluate_score_files(
+    validation_scores: str | Path, validation_labels: str | Path,
+    test_scores: str | Path, test_labels: str | Path, *,
+    model: str, score_direction: str, **evaluation_options,
+) -> EvaluationResult:
+    """Join labels by stable identity, then call the existing final evaluator."""
+    aligned = []
+    for split, score_path, label_path in (
+        ("validation", validation_scores, validation_labels),
+        ("test", test_scores, test_labels),
+    ):
+        scores = load_anomaly_scores(
+            score_path, expected_split=split, expected_model=model,
+            score_direction=score_direction,
+        )
+        labels = load_evaluation_labels(label_path, expected_split=split)
+        if set(scores["row_id"]) != set(labels["row_id"]):
+            raise ValueError("Score and label row IDs must match exactly.")
+        aligned.append(scores.merge(
+            labels, on=["row_id", "split"], how="left", validate="one_to_one",
+            sort=False,
+        ))
+    validation, test = aligned
+    if set(validation["row_id"]) & set(test["row_id"]):
+        raise ValueError("Validation and test row IDs must be disjoint.")
+    return evaluate_final_model(
+        validation["Class"], validation["anomaly_score"],
+        test["Class"], test["anomaly_score"], **evaluation_options,
+    )
