@@ -1,0 +1,9 @@
+# Pinned environment for the Phase 2 data layer: split (#25), preprocessing (#28),
+# loaders (#31), denoising (#33), and data tests and reproducibility checks (#40).
+# Verified with Python 3.9.6 on macOS (arm64). See docs/Phase2_Data_Reproducibility.md.
+numpy==2.0.2
+pandas==2.3.3
+scikit-learn==1.6.1
+joblib==1.5.3
+torch==2.8.0
+pytest==8.4.2

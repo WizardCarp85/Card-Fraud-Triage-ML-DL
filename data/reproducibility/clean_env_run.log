@@ -1,0 +1,45 @@
+# Clean-environment run (issue #40)
+# fresh clone from GitHub of branch issue-40-data-tests at commit 875b182; fresh venv from requirements-data.txt only
+# Python 3.9.6 | Darwin arm64
+joblib==1.5.3
+numpy==2.0.2
+pandas==2.3.3
+pytest==8.4.2
+scikit-learn==1.6.1
+torch==2.8.0
+
+## 1. python -m data.verify_reproducibility --reference data/reproducibility/reproducibility_report.json  (pristine clone; reference = development-venv report)
+source                 PASSED
+splits                 PASSED
+preprocessing          PASSED
+loaders                PASSED
+reference_comparison   PASSED
+overall                PASSED  -> /tmp/clean_report.json
+
+## 2. python -m pytest -q tests/test_data_split.py tests/test_preprocessing.py tests/test_loaders.py tests/test_denoising.py
+50 passed
+
+## 3. python data/freeze_split.py  (documented rebuild)
+Dataset split freeze successfully completed and verified.
+## git diff after freeze_split
+ data/split_manifest.json | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+-      "content_sha256": "40c1d7948019ff7c330112d640a594733d413d471b9a30b3f922f0b3f6ba6761"
++      "content_sha256": "e480eb088e1245037ef3c2711bfdca183d3d18f2fa227a3acf7f9f2654128e91"
+-      "content_sha256": "448fd4f254ee6b15cda467577272ee4f846593dec2e06dec77397a1cd6de30ec"
++      "content_sha256": "f778708327a32e561029edee76f5b7d5781480b62eda39206ad29b55bfaa78c2"
+-      "content_sha256": "f42abe8d4877559c72372d6769edcee5d741fdbfa9da9a99e7931604fb48abc8"
++      "content_sha256": "837f449cc56f05a9e3a1407440d3bb4e8e55655e76c6429de3361220fccedc2d"
+-      "content_sha256": "366ff4ba17a9ce90d84d670f63fa180d20b460b25c11b086d0dbd2772c543ce5"
++      "content_sha256": "94c26019faf94a7d7a968dd99558944404efc69e0759d9fd5fa9c4920a501f7b"
+
+## 4. python -m data.preprocessing
+Verification: PASSED
+## git diff --stat after preprocessing (empty = byte-identical artifacts)
+
+## 5. python -m src.loaders
+denoising    noise_std=0.1  observed std(x_input - x_target)=0.1001
+train        rows=198,242  batches= 775  fraud_rows=  0  first batch x=(256, 29) torch.float32, row_id=(256,) torch.int64
+val_legit    rows= 42,503  batches= 167  fraud_rows=  0  first batch x=(256, 29) torch.float32, row_id=(256,) torch.int64
+val_ranking  rows= 42,558  batches= 167  fraud_rows= 55  first batch x=(256, 29) torch.float32, row_id=(256,) torch.int64
+test         rows= 42,560  batches= 167  fraud_rows= 52  first batch x=(256, 29) torch.float32, row_id=(256,) torch.int64
