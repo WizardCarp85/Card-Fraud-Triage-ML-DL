@@ -1,0 +1,230 @@
+{
+  "timestamp_utc": "2026-11-16T14:25:59.885129+00:00",
+  "purpose": "Phase 2 GMM baseline reproduction on frozen validation split (Issue #30)",
+  "owner": "Rudra Pratap Singh Choudhary (@Rudra-choudhary)",
+  "dependencies": [
+    "#25",
+    "#26",
+    "#28"
+  ],
+  "system": {
+    "python_version": "3.14.7 (main, Aug  5 2026, 10:29:49) [Clang 17.0.0 (clang-1700.6.4.2)]",
+    "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+    "machine": "arm64"
+  },
+  "packages": {
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "joblib": "1.6.0"
+  },
+  "input_artifacts": {
+    "source_dataset_path": "data/creditcard.csv",
+    "source_dataset_sha256": "76274b691b16a6c49d3f159c883398e03ccd6d1ee12d9d8ee38f4b4b98551a89",
+    "manifest_path": "data/split_manifest.json",
+    "manifest_sha256": "89f87ff166fd4438be88b58e77e133d3444124acb8f37f7eca1a6a123af7a7e3",
+    "phase1_gmm_model": {
+      "artifact_path": "results/gmm_model.joblib",
+      "sha256": "5ac282181e19e97baf862599e65c8da8e88b2debf3db84f84e2762746eb03480",
+      "type": "GaussianMixture",
+      "parameters": {
+        "n_components": 14,
+        "covariance_type": "full",
+        "tol": 0.001,
+        "reg_covar": 1e-06,
+        "max_iter": 200,
+        "n_init": 3,
+        "init_params": "kmeans",
+        "random_state": 42,
+        "warm_start": false
+      },
+      "convergence": {
+        "converged": true,
+        "n_iter": 57,
+        "lower_bound": 30.986444499043042
+      }
+    },
+    "phase1_scaler": {
+      "artifact_path": "results/scaler_robust.joblib",
+      "sha256": "df06bee03c6d8e43124869b7c2c7eca8c00458d3f8bc4cb5d03245d3c964073a",
+      "type": "RobustScaler",
+      "n_features_in": 29,
+      "feature_names_in": [
+        "V1",
+        "V2",
+        "V3",
+        "V4",
+        "V5",
+        "V6",
+        "V7",
+        "V8",
+        "V9",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V22",
+        "V23",
+        "V24",
+        "V25",
+        "V26",
+        "V27",
+        "V28",
+        "Amount_log"
+      ],
+      "center": [
+        -0.08404466056630115,
+        0.0785074050277037,
+        0.4948109049263415,
+        0.07203109851860315,
+        -0.167670553344264,
+        -0.2192220411589185,
+        -0.0085296546445697,
+        0.042478010970606,
+        -0.0739424458503442,
+        -0.0992921195571482,
+        0.0635044576008839,
+        0.11359150496190601,
+        0.01236860465084225,
+        0.07632669349724455,
+        0.1778975094607925,
+        0.06405898869300414,
+        -0.03305497879968775,
+        -0.0358528580487689,
+        -0.0153063701653899,
+        -0.044137010128993695,
+        -0.043300643100372405,
+        -0.03515805387388665,
+        -0.0288145011781635,
+        0.05279074763560265,
+        0.1031465435269685,
+        -0.0608528467295463,
+        0.0059539397437412,
+        0.0184886275362663,
+        3.1780538303479458
+      ],
+      "scale": [
+        2.170074437677862,
+        1.3606871260915385,
+        1.553203113426743,
+        1.6743590892594074,
+        1.2463538638704859,
+        1.1525500179787036,
+        1.0741701062424798,
+        0.5172736727884735,
+        1.2881028094751148,
+        0.9611666956308428,
+        1.5326283985998888,
+        1.0895157570862426,
+        1.3498919722332148,
+        0.8772699446270765,
+        1.2770602380355913,
+        1.003380604219019,
+        0.8603859557094837,
+        0.9755155941672025,
+        0.9580130199763097,
+        0.34352726643571174,
+        0.3770943255426973,
+        0.9612693493023358,
+        0.283248570184484,
+        0.7636533203320127,
+        0.6247555874263362,
+        0.5916887801200256,
+        0.15601703677138806,
+        0.11928751130546103,
+        2.4433728185032226
+      ]
+    }
+  },
+  "output_artifacts": {
+    "validation_scores_csv": {
+      "path": "data/scores/gmm_validation.csv",
+      "sha256": "03276204aa848b338d715125248581b5ec79348dbc0c269beda5e8b93988258e",
+      "rows": 42558
+    },
+    "validation_labels_csv": {
+      "path": "data/scores/validation_labels.csv",
+      "sha256": "12e3c74b01c2ccdf3a9e94489f8b7767b34fb1ea9395d4a9e160cfe4b81fd307",
+      "rows": 42558
+    },
+    "test_scores_csv": {
+      "path": "data/scores/gmm_test.csv",
+      "sha256": "7a5d0571a2c4291ed6d5f1bd929c9fe8560e0df7ecab2d0e8d89f139f75d8e0f",
+      "rows": 42560
+    },
+    "test_labels_csv": {
+      "path": "data/scores/test_labels.csv",
+      "sha256": "9540799fa1875c2e7bec6a2e3d0921c766a4ef22841df7c4dfbdfa9e73bd6833",
+      "rows": 42560
+    }
+  },
+  "evaluation_summary": {
+    "validation": {
+      "rows": 42558,
+      "fraud_rows": 55,
+      "average_precision_ap": 0.6509750658894701,
+      "roc_auc": 0.9473868154761268
+    },
+    "test": {
+      "rows": 42560,
+      "fraud_rows": 52,
+      "average_precision_ap": 0.6773020178460817,
+      "roc_auc": 0.9066940340641761
+    },
+    "threshold_selections": [
+      {
+        "fpr_budget": 0.001,
+        "threshold": 143.65081901156682,
+        "validation_recall": 0.7636363636363637,
+        "validation_fpr": 0.00021174975884055244,
+        "true_positives": 42,
+        "false_positives": 9
+      },
+      {
+        "fpr_budget": 0.01,
+        "threshold": 67.95949186438423,
+        "validation_recall": 0.8,
+        "validation_fpr": 0.002376302849210644,
+        "true_positives": 44,
+        "false_positives": 101
+      },
+      {
+        "fpr_budget": 0.05,
+        "threshold": 39.18202235082998,
+        "validation_recall": 0.8727272727272727,
+        "validation_fpr": 0.032468296355551374,
+        "true_positives": 48,
+        "false_positives": 1380
+      }
+    ]
+  },
+  "comparison_with_phase1": {
+    "phase1_available": true,
+    "phase1_path": "results/tables/gmm_scores_val.csv",
+    "phase1_rows": 42558,
+    "reproduced_rows": 42558,
+    "phase1_fraud_rows": 55,
+    "reproduced_fraud_rows": 55,
+    "metrics": {
+      "phase1_validation_ap": 0.6509750658894701,
+      "reproduced_validation_ap": 0.6509750658894701,
+      "ap_diff": 0.0,
+      "phase1_validation_roc_auc": 0.9473868154761268,
+      "reproduced_validation_roc_auc": 0.9473868154761268,
+      "roc_auc_diff": 0.0
+    },
+    "score_distribution": {
+      "max_sorted_absolute_difference": 1.0373923942097463e-12,
+      "mean_sorted_absolute_difference": 4.1531372837411854e-14,
+      "machine_precision_match": true
+    },
+    "explanation_of_differences": "1. Row ID representation: Phase 1 stored 'original_index' as positional indices (198608 to 241165) after duplicate removal. Phase 2 assigns immutable 'row_id' tracking raw row positions in creditcard.csv (199324 to 242066).\n2. Within-timestamp tie-breaking: Phase 1 utilized unstable pandas quicksort on 'Time', causing local row permutation among transactions sharing identical timestamps. Phase 2 freezes stable raw row index ordering. The overall partition membership is 100% concordant, and validation metrics match Phase 1 exactly (AP: 0.650975, ROC-AUC: 0.947387)."
+  }
+}

@@ -1,0 +1,4 @@
+review_capacity,reviewed_transactions,frauds_caught,recall,precision,false_alarms
+100,100,38,0.7307692307692307,0.38,62
+500,500,39,0.75,0.078,461
+1000,1000,41,0.7884615384615384,0.041,959
