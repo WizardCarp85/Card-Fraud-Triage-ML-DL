@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-import argparse
+import pandas as pd
+
 import json
 import logging
 import sys
@@ -165,6 +166,23 @@ def execute_pipeline(
         # 6. Evaluation
         logger.info(f"[Step 4/4] Evaluating {model.name} via evaluation framework...")
         eval_run_dir = run_dir if len(models_to_run) == 1 else (run_dir / model.name)
+        # Save validation and test label files for contract compliance
+        val_labels_df = pd.DataFrame({
+            "row_id": prep_data["val_indices"],
+            "split": ["validation"] * len(prep_data["val_indices"]),
+            "Class": prep_data["y_val"],
+        })
+        test_labels_df = pd.DataFrame({
+            "row_id": prep_data["test_indices"],
+            "split": ["test"] * len(prep_data["test_indices"]),
+            "Class": prep_data["y_test"],
+        })
+        val_labels_path = run_dir / "preprocessed" / "validation_labels.csv"
+        test_labels_path = run_dir / "preprocessed" / "test_labels.csv"
+        val_labels_df.to_csv(val_labels_path, index=False)
+        test_labels_df.to_csv(test_labels_path, index=False)
+        logger.info(f"Validation labels saved to {val_labels_path}")
+        logger.info(f"Test labels saved to {test_labels_path}")
         eval_out = run_evaluation(
             y_val=prep_data["y_val"],
             scores_val=val_scores,
@@ -174,6 +192,7 @@ def execute_pipeline(
             test_indices=prep_data["test_indices"],
             config=config.evaluation,
             run_dir=eval_run_dir,
+            model_name=model.name,
         )
 
         output_files.update(eval_out["artifacts"])
