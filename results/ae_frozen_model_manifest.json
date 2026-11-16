@@ -1,0 +1,120 @@
+{
+  "manifest_version": "1.0.0",
+  "model_family": "Autoencoder",
+  "model_name": "Phase2_Frozen_Undercomplete_Autoencoder",
+  "status": "FROZEN",
+  "author": "Abhigya Sachdeva (@ABHIGYA0205)",
+  "governing_issue": "Issue #36 (Stage 2 Confirmation & Checkpoint Freeze)",
+  "selection_rule_applied": "docs/ae_experiment_plan.md Section 5.4 (Mean Validation AP across seeds {0, 7, 42})",
+  "architecture": {
+    "topology": "29 -> 32 -> 16 -> 32 -> 29",
+    "input_dimension": 29,
+    "bottleneck_dimension": 16,
+    "hidden_dimension": 32,
+    "realized_backbone": "BatchNorm1d + LeakyReLU(negative_slope=0.1) per Addendum A1",
+    "output_layer": "Linear (identity mapping, continuous reconstruction)"
+  },
+  "hyperparameters": {
+    "bottleneck": 16,
+    "denoise": true,
+    "noise_std": 0.5,
+    "learning_rate": 0.001,
+    "batch_size": 256,
+    "max_epochs": 100,
+    "patience": 10,
+    "weight_decay": 0.0,
+    "optimizer": "Adam(lr=0.001, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.0)",
+    "loss_function": "Mean Squared Error (MSE) over 29 features"
+  },
+  "selected_checkpoint": {
+    "run_id": "RUN-S2-W16-DNZ-S7",
+    "seed": 7,
+    "checkpoint_path": "results/phase2/checkpoints/RUN-S2-W16-DNZ-S7.pt",
+    "checkpoint_sha256": "0d247ab9757cd3b15caeaba0049dd7825c8049998dd57a649307c87c64b4a1fb",
+    "val_AP": 0.324527,
+    "val_Precision@100": 0.39,
+    "val_recall_FPR1pct": 0.8,
+    "val_recall_FPR5pct": 0.836364,
+    "val_recon_loss": 0.134965,
+    "selection_rationale": "Selected RUN-S2-W16-DNZ-S7 (seed 7) because its validation AP (0.3245) is closest to the 3-seed mean AP (0.3257) with distance 0.001165."
+  },
+  "multi_seed_stability_metrics": {
+    "seeds_evaluated": [
+      0,
+      7,
+      42
+    ],
+    "mean_val_AP": 0.325692,
+    "std_val_AP": 0.014674,
+    "mean_val_Precision@100": 0.39,
+    "std_val_Precision@100": 0.0,
+    "mean_val_recall_FPR1pct": 0.787879,
+    "mean_val_recall_FPR5pct": 0.830303,
+    "stability_flag": "STABLE",
+    "seed_checkpoint_hashes": {
+      "0": {
+        "run_id": "RUN-S2-W16-DNZ-S0",
+        "val_AP": 0.311635,
+        "checkpoint_path": "results/phase2/checkpoints/RUN-S2-W16-DNZ-S0.pt",
+        "checkpoint_sha256": "1cd885cec1ed00f669d514b85d55b20c48e014384f52800378f4e04d0c2ee769"
+      },
+      "7": {
+        "run_id": "RUN-S2-W16-DNZ-S7",
+        "val_AP": 0.324527,
+        "checkpoint_path": "results/phase2/checkpoints/RUN-S2-W16-DNZ-S7.pt",
+        "checkpoint_sha256": "0d247ab9757cd3b15caeaba0049dd7825c8049998dd57a649307c87c64b4a1fb"
+      },
+      "42": {
+        "run_id": "RUN-S1-W16-DNZ-S42",
+        "val_AP": 0.340914,
+        "checkpoint_path": "results/phase2/checkpoints/RUN-S1-W16-DNZ-S42.pt",
+        "checkpoint_sha256": "9ea1c6766bf0678f39dbb573cf9889a3ba956e6204dda66365a169519ee26ade"
+      }
+    }
+  },
+  "data_provenance": {
+    "dataset_manifest_hash": "89f87ff166fd4438be88b58e77e133d3444124acb8f37f7eca1a6a123af7a7e3",
+    "git_commit": "b3b686da6727d64f3566ca0bcc19bdfc84a9e122",
+    "preprocessing": {
+      "scaler": "RobustScaler (Issue #28, fitted strictly on legitimate training partition)",
+      "feature_count": 29,
+      "feature_names": [
+        "V1",
+        "V2",
+        "V3",
+        "V4",
+        "V5",
+        "V6",
+        "V7",
+        "V8",
+        "V9",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V22",
+        "V23",
+        "V24",
+        "V25",
+        "V26",
+        "V27",
+        "V28",
+        "Amount_log"
+      ],
+      "target_column": "Class (strictly excluded from training and model inputs)"
+    }
+  },
+  "score_contract": {
+    "score_definition": "Per-transaction Mean Squared Error (MSE) reconstruction loss across 29 features",
+    "score_direction": "higher_is_more_suspicious",
+    "formula": "score(x) = (1 / 29) * sum((x_j - x_hat_j)^2)"
+  }
+}
