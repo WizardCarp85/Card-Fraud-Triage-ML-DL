@@ -1,0 +1,32 @@
+{
+  "status": "COMPLETED",
+  "evaluation_split": "test",
+  "threshold_selection": "None (applied pre-calibrated frozen validation thresholds)",
+  "training_performed": false,
+  "models_evaluated": [
+    "gmm",
+    "autoencoder"
+  ],
+  "provenance": {
+    "gmm_threshold_manifest": {
+      "path": "results/phase2/gmm/threshold_manifest.json",
+      "sha256": "9ccf2e1208e411a82838a3f1fc801ed3b51e0e383f826f97bc434e84a2dfcdea"
+    },
+    "ae_threshold_manifest": {
+      "path": "results/phase2/autoencoder/threshold_manifest.json",
+      "sha256": "eadf5f079643199da6d04b059e41ef7fc1f82bed116eab082e8291554b445bbe"
+    },
+    "ae_checkpoint": {
+      "path": "results/phase2/checkpoints/RUN-S2-W16-DNZ-S7.pt",
+      "sha256": "0d247ab9757cd3b15caeaba0049dd7825c8049998dd57a649307c87c64b4a1fb"
+    },
+    "test_labels": {
+      "path": "data/scores/test_labels.csv",
+      "sha256": "9540799fa1875c2e7bec6a2e3d0921c766a4ef22841df7c4dfbdfa9e73bd6833"
+    },
+    "test_indices": {
+      "path": "data/splits/test_indices.csv",
+      "sha256": "38d2fbad6af07da97caf7271ac89be7f1ae7a43671e0f7361a8364b22b8dbce1"
+    }
+  }
+}
