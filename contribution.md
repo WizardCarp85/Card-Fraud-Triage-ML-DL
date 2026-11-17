@@ -11,13 +11,14 @@ Closes #<!-- issue number -->
 <!-- Mention important modules/files and design decisions. -->
 
 ## Verification
-- [ ] Compiles with Icarus Verilog
-- [ ] Relevant testbench(s) pass
-- [ ] Checked waveforms in GTKWave where applicable
-- [ ] No unrelated files or changes included
+- [ ] Passes pytest/unittest suite (`python -m pytest -q` or `python -m unittest discover tests`)
+- [ ] Code formatting and linting pass (`ruff check` or equivalent)
+- [ ] Stage boundary and data leakage checks verified (zero label exposure, legitimate-only training)
+- [ ] Relevant documentation, manifests and schemas updated
+- [ ] No unrelated files or unverified artifact modifications included
 
-## Screenshots / Waveforms
-<!-- Attach screenshots or waveform evidence when useful. -->
+## Evidence / Outputs
+<!-- Attach test logs, execution outputs, or artifact summaries when useful. -->
 
 ## Checklist
 - [ ] My branch is based on the latest main

@@ -7,6 +7,14 @@
 
 ### Technical Project Documentation
 
+> [!NOTE]
+> **Phase 1 Historical Record**: This document preserves the original Phase 1 technical system documentation (GMM probabilistic baseline). For Phase 2 deep autoencoder exploration, paired evaluation, and the final technical report, see:
+> - **Phase 2 Technical Report:** [`reports/phase2/main.pdf`](../reports/phase2/main.pdf) and [`reports/phase2/main.tex`](../reports/phase2/main.tex)
+> - **Phase 2 Integrated Workflow:** [`docs/PHASE2_INTEGRATED_WORKFLOW.md`](PHASE2_INTEGRATED_WORKFLOW.md)
+> - **Phase 2 Autoencoder Model Card:** [`docs/model_card.md`](model_card.md)
+> - **Phase 2 Paired Evaluation:** [`docs/paired_evaluation.md`](paired_evaluation.md)
+> - **Project README:** [`README.md`](../README.md)
+
 ---
 
 ## 1. Executive Summary & Problem Formulation
@@ -230,9 +238,11 @@ card-fraud-triage-project26/
 
 ## 9. Future Work & Roadmap (Phase 2)
 
-Phase 1 establishes a classical probabilistic machine learning baseline via Gaussian Mixture Density Scoring. Planned Phase 2 extensions include:
+> [!NOTE]
+> **Phase 2 Implementation Complete**: The core Phase 2 objectives have been executed and verified in the repository. The deep autoencoder architecture, denoising training objective, multi-seed stability audit, threshold calibration, and paired GMM vs. AE test evaluation are fully integrated. See [`reports/phase2/main.pdf`](../reports/phase2/main.pdf) for the final technical report and [`docs/paired_evaluation.md`](paired_evaluation.md) for paired test findings.
 
-1. **Deep Generative Modeling:** Implement a PyTorch-based Deep Autoencoder to learn non-linear reconstruction manifolds of legitimate transaction behavior without parametric Gaussian assumptions.
-2. **Hybrid Score Fusion:** Combine GMM probabilistic density scores with Autoencoder reconstruction error ($L_2$ norm) into an ensemble anomaly index:
-   $$S_{\text{hybrid}}(x) = \alpha \cdot \tilde{S}_{\text{GMM}}(x) + (1 - \alpha) \cdot \tilde{S}_{\text{AE}}(x)$$
-3. **Semi-Supervised Fine-Tuning:** Explore extreme-value calibration (EVT) and contrastive loss embeddings to refine the triage boundary using verified historical fraud alerts.
+Phase 1 established a classical probabilistic machine learning baseline via Gaussian Mixture Density Scoring. Phase 2 delivered:
+
+1. **Deep Generative Modeling:** Implemented a PyTorch-based Deep Denoising Autoencoder ($29 \to 32 \to 16 \to 32 \to 29$) with BatchNorm, LeakyReLU, and Gaussian noise corruption ($\sigma=0.5$) learning non-linear reconstruction manifolds of legitimate card transactions.
+2. **Paired Test Evaluation:** Performed head-to-head benchmarking on the frozen test partition (42,560 rows, 52 fraud cases): GMM achieved AP 0.6773, while the Autoencoder achieved AP 0.4867 and recovered 40 vs 38 frauds at 100 review capacity.
+3. **Deferred Extensions:** Hybrid GMM-Autoencoder score fusion, extreme-value calibration (EVT), and online updating remain preserved as deferred future extensions.
