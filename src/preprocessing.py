@@ -80,6 +80,7 @@ class PreprocessingPipeline:
         X_test = self.scaler.transform(df_test[self.feature_names])
 
         y_train = df_train["Class"].to_numpy(dtype=np.int8)
+        y_train_legit = df_train_legit["Class"].to_numpy(dtype=np.int8)
         y_val = df_val["Class"].to_numpy(dtype=np.int8)
         y_test = df_test["Class"].to_numpy(dtype=np.int8)
 
@@ -89,8 +90,11 @@ class PreprocessingPipeline:
             "X_val": X_val,
             "X_test": X_test,
             "y_train": y_train,
+            "y_train_legit": y_train_legit,
             "y_val": y_val,
             "y_test": y_test,
+            "train_indices": df_train.index.to_numpy(),
+            "train_legit_indices": df_train_legit.index.to_numpy(),
             "val_indices": df_val.index.to_numpy(),
             "test_indices": df_test.index.to_numpy(),
             "feature_names": self.feature_names,

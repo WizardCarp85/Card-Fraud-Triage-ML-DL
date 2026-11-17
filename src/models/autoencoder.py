@@ -204,3 +204,29 @@ class AutoencoderAnomalyModel(BaseAnomalyModel):
         self.net.load_state_dict(torch.load(model_file, map_location=torch.device("cpu")))
         self.net.eval()
         return self
+
+    @classmethod
+    def load_checkpoint(
+        cls,
+        checkpoint_path: str | Path,
+        input_dim: int = 29,
+        latent_dim: int = 16,
+        hidden_dims: tuple[int, ...] = (32,),
+    ) -> AutoencoderAnomalyModel:
+        """Load weights from a checkpoint file into a new model instance."""
+        config = AutoencoderConfig(
+            input_dim=input_dim,
+            latent_dim=latent_dim,
+            hidden_dims=hidden_dims,
+        )
+        model = cls(config)
+        net = PyTorchAutoencoderNet(
+            input_dim=input_dim,
+            latent_dim=latent_dim,
+            hidden_dims=hidden_dims,
+        )
+        state_dict = torch.load(checkpoint_path, map_location=torch.device("cpu"), weights_only=True)
+        net.load_state_dict(state_dict)
+        net.eval()
+        model.net = net
+        return model
