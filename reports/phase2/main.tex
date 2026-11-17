@@ -52,6 +52,8 @@ Test & 42,560 & 42,508 & 52\\\bottomrule
 \end{tabular}
 \end{table}
 
+The exact elapsed-time ranges are training up to 132,906 seconds, validation from 132,906 to 151,320 seconds, and test from 151,320 to 172,792 seconds. These ranges share endpoint timestamps because transactions can have identical times. The frozen raw-row-ID rule assigns row 199323 at 132,906 seconds to training and row 199324 to validation. At 151,320 seconds, row 242066 belongs to validation, while rows 242063, 242064 and 242065 belong to test. The frozen ID lists, rather than overlapping inclusive time filters, determine membership.
+
 Membership uses the original zero-based raw row ID. The split manifest records the source checksum and ID lists. Frozen membership resolves transactions sharing boundary timestamps and preserves the Phase 1 partition membership. Score exports retain stable ID, split, model name and anomaly score. Evaluation labels are stored separately and joined one-to-one.
 
 The evidence is \artifact{data/split_manifest.json} and \artifact{data/splits/}. Test prevalence is $52/42560$, approximately $0.1222\%$, which defines the precision--recall prevalence reference.
@@ -65,6 +67,32 @@ Labels support legitimate-row filtering, validation model selection and evaluati
 
 \subsection{Prior Holdout Exposure}
 The test partition was examined during Phase 1. Phase 2 uses it as a historical comparison set with known prior exposure. Architecture decisions and threshold calibration use validation data. Models and policies are frozen before the paired test evaluation. No model or threshold adjustment follows the reported test results.
+
+\begin{figure}[!ht]\centering
+\begin{tikzpicture}[x=1cm,y=.85cm,
+every node/.style={font=\footnotesize,align=center},
+box/.style={draw,rounded corners,text width=3.3cm,minimum height=.47cm},
+model/.style={draw,fill=blue!8,text width=1.45cm,minimum height=.5cm}]
+\node[box] (raw) at (0,0) {ULB dataset};
+\node[box] (dedup) at (0,-.72) {Deduplication};
+\node[box] (split) at (0,-1.44) {Frozen chronological split};
+\node[box] (prep) at (0,-2.16) {Shared preprocessing};
+\node[model] (gmm) at (-1,-3) {GMM};
+\node[model] (ae) at (1,-3) {Autoencoder};
+\node[box] (scores) at (0,-3.9) {Anomaly scores};
+\node[box,fill=orange!10] (cal) at (0,-4.8) {Validation threshold calibration};
+\node[box] (eval) at (0,-5.8) {Frozen paired test evaluation};
+\node[box] (triage) at (0,-6.6) {Fraud triage and workload};
+\draw[->] (raw)--(dedup);\draw[->] (dedup)--(split);\draw[->] (split)--(prep);
+\draw[->] (prep)--(gmm);\draw[->] (prep)--(ae);
+\draw[->] (gmm)--(scores);\draw[->] (ae)--(scores);
+\draw[->] (scores)--(cal);
+\draw[->] (cal)--(eval);
+\draw[->] (scores.west) -- ++(-.45,0) |- node[pos=.75,left,font=\scriptsize]{test} (eval.west);
+\draw[->] (eval)--(triage);
+\end{tikzpicture}
+\caption{Overall workflow. Models fit legitimate training rows. Validation scores calibrate thresholds; test scores enter the paired evaluation after the freeze.}
+\label{fig:workflow}\end{figure}
 
 \section{Models and Scores}
 \subsection{Gaussian Mixture Baseline}
@@ -162,7 +190,7 @@ Average precision is the primary ranking summary,
 \begin{equation}
 \mathrm{AP}=\sum_n(R_n-R_{n-1})P_n.
 \end{equation}
-The shared evaluation utility implements this definition. ROC-AUC is secondary. At capacity $K$, precision is the fraction of frauds in the $K$ highest scores and recall is the caught fraction of all frauds. Equal-score top-$K$ ordering uses lexical stable row ID for both models, ensuring consistency under CSV row permutations.
+The shared evaluation utility implements this definition. AP is primary because precision directly measures the fraction of alerts that are genuine frauds. With only about 0.122\% fraud prevalence on test, even a small false-positive rate can produce many false alarms. ROC-AUC measures ranking over true-positive and false-positive rates; its large legitimate denominator can make those operational counts less apparent. Reporting AP and the PR curve emphasizes fraud recovery together with alert quality. AP is prevalence-dependent, so comparisons here use identical test membership. ROC-AUC remains a secondary measure, complemented by explicit capacity and threshold tables. At capacity $K$, precision is the fraction of frauds in the $K$ highest scores and recall is the caught fraction of all frauds. Equal-score top-$K$ ordering uses lexical stable row ID for both models, ensuring consistency under CSV row permutations.
 
 \subsection{Validation-Only Policies}
 For $\alpha\in\{0.001,0.01,0.05\}$, the existing selector maximizes validation recall subject to validation FPR $\leq\alpha$. When recall ties, it retains the highest threshold. A transaction is flagged if $s(\mathbf{x})\geq\tau$, including all members of a tied-score group.
@@ -254,7 +282,7 @@ The committed inference environment uses Python 3.12.14, PyTorch 2.8.0, NumPy 2.
 
 Reproduction runs frozen test inference followed by the paired evaluation script. Exact commands appear in \artifact{docs/paired_evaluation.md}. The freeze scripts also verify saved policies against validation-only recalibration.
 
-The paired change passed 30 relevant regression tests. A broader suite recorded 98 passes and three setup errors in historical AE-baseline tests requiring an absent \texttt{artifacts/phase2/run\_*} directory. These setup errors limit the full-suite verification claim. Committed paired-score reproduction tests pass. Data-layer verification and dependencies appear in \artifact{docs/Phase2_Data_Reproducibility.md} and \artifact{requirements-data.txt}.
+For this report revision, running \texttt{python -m pytest -q} with the pinned data dependencies produced 105 passes, three skips and one failure. The exact command, package versions and output are committed in \artifact{reports/phase2/full_suite_test_log.txt}. The skipped historical AE tests require an absent run directory. The failure is an inference-code identity check after the later workflow integration changed \artifact{src/models/autoencoder.py}, while the paired inference receipt still records the earlier code hash. This failure prevents a fully passing full-suite claim. It does not indicate a changed score export; the report's numerical tables remain tied to the committed paired artifacts at snapshot \texttt{252197f}. The earlier 98-pass summary is superseded here by the reproducible current run. Data-layer verification and dependencies appear in \artifact{docs/Phase2_Data_Reproducibility.md} and \artifact{requirements-data.txt}.
 
 \section{Discussion and Limitations}
 \subsection{Metric-Dependent Trade-offs}
@@ -265,9 +293,9 @@ Denoising improves validation AP relative to the clean width-16 model. This supp
 \subsection{Scope and Uncertainty}
 Only 52 frauds occur in test, so one case moves recall by approximately 1.92 percentage points. The three-seed study measures validation variability, without providing a confidence interval for future deployment performance.
 
-The dataset spans a short historical period and anonymizes most features. Customer-level identity grouping, new fraud mechanisms and long-term drift cannot be fully assessed. Deduplication and chronological membership support reproducibility, while production readiness needs separate operational evidence.
+The dataset spans a short historical period and anonymizes most features. No independent external dataset validation has been performed. No customer-level grouping analysis was conducted, and the anonymized features do not establish account-level separation across partitions. New fraud mechanisms and long-term drift therefore remain untested. Deduplication and chronological membership support reproducibility, while production readiness needs separate operational evidence.
 
-Frauds resembling legitimate behavior can reconstruct accurately. GMM quality depends on component adequacy and numerical conditioning. Both models miss 11 frauds at 1,000 reviews. Analyst costs, customer friction and lost monetary value are unquantified because verified cost inputs are absent.
+Frauds resembling legitimate behavior can reconstruct accurately. GMM quality depends on component adequacy and numerical conditioning. Both models miss 11 frauds at 1,000 reviews. Real-world analyst review costs have not been measured. Customer friction and lost monetary value are unquantified because verified cost inputs are absent. No production deployment or online monitoring evaluation has been performed.
 
 The test partition had prior Phase 1 exposure. This report discloses that exposure while preserving Phase 2 validation-only selection and the frozen comparison. Independent confirmation requires a fresh time period.
 
@@ -276,6 +304,9 @@ Standalone GMM and AE comparison is complete. Score fusion, latent-space density
 
 \section{Member Contributions}
 Yashkumar Nimje led frozen data provenance and split coordination, experiment orchestration and AE threshold calibration. Saksham Narotra implemented shared preprocessing, loaders, corruption handling and data-pipeline reproducibility checks. Rudra Pratap Singh Choudhary implemented GMM reproduction, reference AE and inference, and contributed methodology. Abhigya Sachdeva designed experiments, ran ablations, analyzed seed stability, selected the checkpoint and documented the model card. Somraj Nandi implemented the shared evaluation contract, GMM freeze, final paired evaluation and technical report assembly. The repository issues and committed artifacts trace these responsibilities \cite{repo}.
+
+\section{Practical Interpretation}
+For a team emphasizing performance across the complete ranking, the verified results favor GMM on AP. For a fixed 100-case review queue on this test period, AE recovers two additional frauds while generating two fewer false alarms. At the strictest frozen validation budget, GMM catches more fraud with fewer false alarms. Threshold-based workloads differ substantially at the other budgets as well. Preference should therefore depend on the declared review capacity and acceptable workload, with both models assessed on future independent data before operational adoption. Neither model is universally superior across the measured criteria.
 
 \section{Conclusion}
 This paired experiment demonstrates an operating-point trade-off. GMM achieves AP 0.6773, while the denoising AE achieves 0.4867 and catches two extra frauds in 100 reviews. At 1,000 reviews both recover 41 frauds. Frozen policies quantify false-alarm workloads. Scores, manifests and logs provide reproducible evidence within the stated historical-data limitations.

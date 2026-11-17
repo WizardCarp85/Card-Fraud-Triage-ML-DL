@@ -19,5 +19,11 @@
     "data/scores/autoencoder_test.csv": "65207b0972705333a0b378b1b3573ee9158be4156654e8bd4c864f8af265cdd3",
     "data/scores/test_labels.csv": "9540799fa1875c2e7bec6a2e3d0921c766a4ef22841df7c4dfbdfa9e73bd6833",
     "src/models/autoencoder.py": "0479a53d0974b4a13511158640f14856c0c43d43542eb7e2c2d867f9c1b2ec55"
-  }
+  },
+  "verification_commit": "4f83b78",
+  "verification_test_log": {
+    "path": "reports/phase2/full_suite_test_log.txt",
+    "sha256": "2bd5fb1920ab3da74230580df07a1bcee6d321b610a0e996009ffe21ccfc726b"
+  },
+  "source_note": "Experiment artifacts refer to 252197f. Current full-suite evidence refers to 4f83b78; later inference-code changes are disclosed in the report."
 }
