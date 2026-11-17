@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import pandas as pd
-
+import argparse
 import json
 import logging
 import sys
@@ -13,7 +12,15 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import pandas as pd
 
+from src.boundary_checks import (
+    execute_frozen_test_evaluation,
+    validate_feature_contract,
+    validate_loader_streams,
+    validate_score_contract,
+    validate_split_isolation,
+)
 from src.config import Phase2Config
 from src.data import (
     DatasetNotFoundError,
@@ -22,6 +29,7 @@ from src.data import (
     validate_data_inputs,
 )
 from src.evaluation_runner import run_evaluation
+from src.loaders import make_autoencoder_loaders
 from src.models import SUPPORTED_MODELS, BaseAnomalyModel, get_model
 from src.preprocessing import PreprocessingPipeline
 from src.provenance import compute_file_sha256, generate_provenance
@@ -122,6 +130,11 @@ def execute_pipeline(
     # 3. Load data splits
     logger.info("[Step 1/4] Ingesting frozen dataset partitions from manifest...")
     splits = load_split_partitions(config.data)
+    manifest_content = None
+    if manifest_path.is_file():
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest_content = json.load(f)
+    validate_split_isolation(splits, manifest_content)
     logger.info(f"           Train rows      : {len(splits['train']):,} (Fraud: {splits['train']['Class'].sum()})")
     logger.info(f"           Train-legit rows: {len(splits['train_legit']):,} (Fraud: {splits['train_legit']['Class'].sum()})")
     logger.info(f"           Val rows        : {len(splits['val']):,} (Fraud: {splits['val']['Class'].sum()})")
@@ -131,11 +144,47 @@ def execute_pipeline(
     logger.info("[Step 2/4] Running leakage-safe feature transformations & scaling...")
     preprocessor = PreprocessingPipeline(config.preprocessing)
     prep_data = preprocessor.fit_transform_splits(splits)
+    validate_feature_contract(prep_data)
 
     scaler_file = run_dir / "preprocessed" / f"scaler_{config.preprocessing.scaler_type}.joblib"
     preprocessor.save_scaler(scaler_file)
     logger.info(f"           Scaler fitted strictly on legitimate training samples ({len(prep_data['X_train_legit']):,} rows).")
     logger.info(f"           Fitted scaler saved to: {scaler_file}")
+
+    # Build and validate PyTorch loaders for autoencoder contract
+    loader_splits = {
+        "train_legit": {
+            "X": prep_data["X_train_legit"],
+            "y": prep_data["y_train_legit"],
+            "row_ids": prep_data["train_legit_indices"],
+        },
+        "val": {
+            "X": prep_data["X_val"],
+            "y": prep_data["y_val"],
+            "row_ids": prep_data["val_indices"],
+        },
+        "test": {
+            "X": prep_data["X_test"],
+            "y": prep_data["y_test"],
+            "row_ids": prep_data["test_indices"],
+        },
+    }
+    loader_manifest = manifest_content or {
+        "split_indices": {
+            "train_legit": list(prep_data["train_legit_indices"]),
+            "val": list(prep_data["val_indices"]),
+            "test": list(prep_data["test_indices"]),
+        }
+    }
+    loader_bundle = make_autoencoder_loaders(
+        loader_splits,
+        loader_manifest,
+        batch_size=config.autoencoder.batch_size,
+        seed=config.seed,
+        feature_names=prep_data["feature_names"],
+    )
+    validate_loader_streams(loader_bundle, loader_manifest)
+    logger.info("           PyTorch loader streams verified (4 streams, strict label isolation).")
 
     # Track output files for manifest
     output_files: dict[str, str] = {
@@ -198,6 +247,23 @@ def execute_pipeline(
         output_files.update(eval_out["artifacts"])
         model_summaries[model.name] = eval_out["summary"]
 
+        # Validate score contracts on generated score files
+        val_score_file = eval_out["artifacts"]["scores_val"]
+        test_score_file = eval_out["artifacts"]["scores_test"]
+        validate_score_contract(
+            pd.read_csv(val_score_file),
+            expected_model=model.name,
+            expected_split="validation",
+            expected_row_ids=prep_data["val_indices"],
+        )
+        validate_score_contract(
+            pd.read_csv(test_score_file),
+            expected_model=model.name,
+            expected_split="test",
+            expected_row_ids=prep_data["test_indices"],
+        )
+        logger.info(f"           Score contracts verified for {model.name} (val & test).")
+
         val_ap = eval_out["summary"]["validation"]["ap"]
         test_ap = eval_out["summary"]["test"]["ap"]
         logger.info(f"           Validation AP (PR-AUC): {val_ap:.4f}")
@@ -253,7 +319,7 @@ def build_cli_parser() -> argparse.ArgumentParser:
         "command",
         nargs="?",
         default="all",
-        choices=["all", "preprocess", "train", "eval"],
+        choices=["all", "preprocess", "train", "eval", "eval-frozen"],
         help="Pipeline command to execute.",
     )
     parser.add_argument(
@@ -337,7 +403,12 @@ def main() -> None:
     models_to_run = [args.model] if args.model != "all" else list(SUPPORTED_MODELS)
 
     try:
-        execute_pipeline(config, models_to_run)
+        if args.command == "eval-frozen":
+            out_dir = args.output_dir or "results/phase2/frozen_eval"
+            execute_frozen_test_evaluation(output_dir=out_dir)
+            print(f"\n[FROZEN EVALUATION] Completed successfully. Outputs saved to '{out_dir}'.")
+        else:
+            execute_pipeline(config, models_to_run)
     except (
         DatasetNotFoundError,
         ManifestNotFoundError,
