@@ -47,6 +47,14 @@ def main():
     for key, path in (("test_scores_csv", score_paths["gmm"]), ("test_labels_csv", label_path)):
         if artifact_identity(path)["sha256"] != baseline["output_artifacts"][key]["sha256"]:
             raise ValueError("GMM test export differs from reproduced baseline.")
+    inference_path = Path("results/phase2/paired/inference_provenance.json")
+    inference = json.loads(inference_path.read_text())
+    for model, path in score_paths.items():
+        key = "ae_scores" if model == "autoencoder" else "gmm_scores"
+        if artifact_identity(path) != inference[key]:
+            raise ValueError("Test scores differ from verified frozen inference.")
+        if artifact_identity(manifests[model]) != inference["threshold_manifests"][model]:
+            raise ValueError("Policy changed after frozen inference.")
     tables, frames = compare_score_files(score_paths, label_path, policies, ids)
     args.output.mkdir(parents=True, exist_ok=True)
     for name, table in tables.items():
@@ -65,6 +73,9 @@ def main():
     identities = {model: artifact_identity(path) for model, path in score_paths.items()}
     evidence = {
         "score_files": identities,
+        "inference_provenance": artifact_identity(inference_path),
+        "evaluation_code": artifact_identity("src/paired_evaluation.py"),
+        "runner_code": artifact_identity("scripts/evaluate_frozen_pair.py"),
         "threshold_manifests": {model: artifact_identity(path) for model, path in manifests.items()},
         "test_labels": artifact_identity(label_path), "test_ids": artifact_identity(ids_path),
         "prior_holdout_exposure": "This test partition was previously examined in Phase 1.",
@@ -81,6 +92,12 @@ def main():
         f"{rows.loc['autoencoder', 'average_precision_ap']:.4f}. At 100 reviews, "
         f"{overlap.both_caught} frauds are caught by both, {overlap.a_only} only by GMM "
         f"and {overlap.b_only} only by AE. See triage.csv for false alarms and recall.\n\n"
+        "GMM has the higher AP across the full ranking, while the AE catches two additional frauds "
+        "in the 100-case queue. At 1,000 reviews both catch 41 of 52 frauds and generate 959 false alarms. "
+        "A single fraud changes recall by about 1.92 percentage points.\n\n"
+        "At the validation-selected 0.1% FPR budget, GMM catches 33 frauds with four false alarms, "
+        "while AE catches 24 with 14 false alarms. At the 1% budget, GMM catches 38 with 69 false "
+        "alarms and AE catches 40 with 201. These frozen policies have different realized workloads.\n\n"
         "thresholds.csv reports realized test FPR against each validation budget. "
         "These rates can differ under temporal shift. All reported values trace to provenance.json.\n"
     )

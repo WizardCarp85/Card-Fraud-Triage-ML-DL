@@ -91,5 +91,30 @@ class PairedTests(unittest.TestCase):
             load_frozen_policy(path, "gmm")
 
 
+class FinalArtifactTests(unittest.TestCase):
+    def test_committed_outputs_reproduce_from_scores_and_policies(self):
+        root = Path("results/phase2/paired")
+        policies = {name: load_frozen_policy(
+            f"results/phase2/{name}/threshold_manifest.json", name
+        ) for name in ("gmm", "autoencoder")}
+        ids = pd.read_csv("data/splits/test_indices.csv", dtype=str)["raw_row_id"]
+        tables, _ = compare_score_files(
+            {"gmm": "data/scores/gmm_test.csv", "autoencoder": "data/scores/autoencoder_test.csv"},
+            "data/scores/test_labels.csv", policies, ids,
+        )
+        for name, table in tables.items():
+            saved = pd.read_csv(root / f"{name}.csv")
+            pd.testing.assert_frame_equal(saved.fillna(""), table.fillna(""), check_dtype=False, atol=1e-12)
+
+    def test_inference_inputs_and_score_hashes_match_receipt(self):
+        from src.threshold_calibration import artifact_identity
+        evidence = json.loads(Path("results/phase2/paired/inference_provenance.json").read_text())
+        for key in ("ae_scores", "gmm_scores", "scoring_code", "inference_code"):
+            identity = evidence[key]
+            self.assertEqual(artifact_identity(identity["path"]), identity)
+        for identity in evidence["threshold_manifests"].values():
+            self.assertEqual(artifact_identity(identity["path"]), identity)
+
+
 if __name__ == "__main__":
     unittest.main()

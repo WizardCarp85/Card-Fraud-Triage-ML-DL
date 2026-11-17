@@ -1,32 +1,47 @@
 # Final paired evaluation
 
-## Current execution status
+The GMM freeze from #37 and AE freeze from #62 are merged. This evaluation uses the selected RUN-S2-W16-DNZ-S7 checkpoint and the two committed threshold manifests. Issue #38's older #46 dependency reference resolves to a split PR.
 
-The comparison implementation is ready for frozen test exports. Actual paired results are pending the AE validation threshold manifest owned by Yash in issue #62 and the selected AE checkpoint's test score export. Issue #38 still refers to #46, which resolves to an older split PR. The external creditcard.csv is also absent from the implementation environment, so AE test inference has not been run here.
+## Reproduction
 
-No experimental paired metrics or plots are committed by this change. Synthetic fixtures exercise the evaluation code. Complete the final execution and commit its artifacts before closing issue #38.
-
-## Execution after the prerequisites arrive
-
-From the repository root, use the selected checkpoint's shared-contract test score CSV and the AE threshold manifest conforming to docs/threshold_manifest_schema.md.
+Run from the repository root with requirements-data.txt and matplotlib installed. Supply the ULB CSV whose SHA-256 matches data/split_manifest.json.
 
 ```sh
+python -m scripts.score_frozen_test --data /path/to/creditcard.csv
 python -m scripts.evaluate_frozen_pair \
   --ae-scores data/scores/autoencoder_test.csv \
   --ae-thresholds results/phase2/autoencoder/threshold_manifest.json
 ```
 
-The AE path arguments are explicit inputs. These example paths will exist after their producers export the files. The threshold manifest model must be autoencoder and its provenance must identify the frozen checkpoint from results/ae_frozen_model_manifest.json. Inference must reload that checkpoint, use the frozen preprocessing, run in eval mode with gradients disabled, and preserve raw test IDs. Use the existing inference implementation; training and candidate selection have already concluded.
+Frozen scoring runs on CPU with PyTorch 2.8.0, scikit-learn 1.6.1 and the remaining pinned data dependencies under Python 3.12.14. Exact package versions and code/input hashes are in results/phase2/paired/inference_provenance.json. Existing AE exports are checked against a repeated inference within rtol=1e-6 and atol=1e-8 before writing. This verification repeats inference only.
 
-The runner verifies both policy manifests and their artifact hashes before loading test scores. It checks selected AE checkpoint identity, feature order, shared split identity, frozen test membership, score direction and one-to-one label alignment. It verifies the existing GMM test export against the #30 provenance. It applies only saved thresholds and never calls threshold selection or model fitting. Fixed thresholds flag ties together. Top-K ties follow lexical stable row ID, as in the shared contract.
+Both models score identical raw test row IDs using the shared feature builder and their respective frozen scalers. The resulting feature matrices match exactly. Regenerated GMM scores agree with the committed #30 export within a maximum absolute difference of 2.85e-14, so that verified export is retained for evaluation. The AE checkpoint is reloaded into the frozen architecture and scored through AutoencoderAnomalyModel.score in eval mode with gradients disabled. Labels remain outside model inputs.
 
-The output directory defaults to results/phase2/paired and contains ranking.csv, thresholds.csv, triage.csv, overlap.csv, precision_recall.png, provenance.json and interpretation.md. AP is primary and ROC-AUC secondary. Threshold tables show validation budget and realized test FPR/recall/precision, frauds caught/missed and false alarms. The capacity tables report 100, 500 and 1,000 reviews. The overlap table identifies common and unique fraud catches, including unique IDs. Provenance links scores, policies, labels and test membership by hash.
+The runner verifies model/scaler and validation artifact hashes, the selected AE checkpoint, feature order, shared split identity, test membership and score-to-label alignment. The inference receipt connects the actual score exports to both policy manifests. It applies saved thresholds without calibration or fitting. Tied scores move together for fixed thresholds. Top-K ties follow lexical stable row ID.
 
-A no-alert frozen policy produces zero alerts and retains its explicit status. Undefined policies stop execution. The historical holdout was examined during Phase 1. Describe the final comparison with that prior exposure disclosed.
+## Results and artifacts
 
-## Completion procedure
+The test partition contains 42,560 transactions and 52 frauds, a prevalence of 0.1222%. It was previously examined in Phase 1. Interpret this paired comparison with that prior exposure disclosed.
 
-1. Merge the validation-only AE threshold freeze from #62.
-2. Generate test scores from the already selected checkpoint using the frozen test IDs, record checkpoint/scaler provenance, and commit the score export.
-3. Run the command above once all choices are frozen.
-4. Review the saved outputs, commit them with the interpretation, and mark the paired-evaluation PR ready for review. Model or threshold changes must follow a separately documented protocol, without selection against these test results.
+| Measure | GMM | Autoencoder |
+|---|---:|---:|
+| Average precision | 0.677302 | 0.486678 |
+| ROC-AUC | 0.906694 | 0.919871 |
+| Frauds caught in 100 reviews | 38 | 40 |
+| False alarms in 100 reviews | 62 | 60 |
+| Frauds caught in 500 reviews | 39 | 40 |
+| Frauds caught in 1,000 reviews | 41 | 41 |
+
+GMM has higher AP across the ranking. The AE's 100-case queue includes all 38 GMM catches and two additional frauds, raw IDs 272521 and 274475. This capacity-specific result does not establish improvement at every operating point. At the frozen 0.1% validation FPR budget, GMM catches 33 frauds with four false alarms and AE catches 24 with 14. At the 1% budget, GMM catches 38 with 69 false alarms and AE catches 40 with 201. At the 5% budget both catch 41, with 914 GMM false alarms and 767 AE false alarms. The policy workloads differ because realized test FPR differs from validation FPR.
+
+Every value traces to committed artifacts.
+
+- data/scores/autoencoder_test.csv contains the selected AE's shared-contract test export.
+- data/scores/gmm_test.csv is the verified GMM export.
+- results/phase2/paired/ranking.csv and precision_recall.png show AP, secondary ROC-AUC and the prevalence baseline.
+- thresholds.csv reports frozen thresholds, validation budgets, realized test FPR/recall/precision, caught/missed fraud and false alarms.
+- triage.csv and overlap.csv show capacity results, shared catches and unique fraud IDs.
+- inference_provenance.json and provenance.json record input/model/code hashes and the selected inference environment.
+- interpretation.md provides a concise results narrative.
+
+The threshold and model artifacts retain their frozen identities. A single fraud moves recall by about 1.92 percentage points on this 52-fraud test partition. Both models miss 11 frauds at the 1,000-case capacity.

@@ -1,0 +1,4 @@
+review_capacity,model_a,model_b,both_caught,a_only,b_only,union_caught,a_only_ids,b_only_ids
+100,gmm,autoencoder,38,0,2,40,[],"[""272521"", ""274475""]"
+500,gmm,autoencoder,39,0,1,40,[],"[""274475""]"
+1000,gmm,autoencoder,41,0,0,41,[],[]
