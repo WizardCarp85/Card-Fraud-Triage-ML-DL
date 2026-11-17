@@ -1,0 +1,23 @@
+{
+  "source_commit": "252197f",
+  "artifacts": {
+    "data/split_manifest.json": "89f87ff166fd4438be88b58e77e133d3444124acb8f37f7eca1a6a123af7a7e3",
+    "data/artifacts/feature_metadata.json": "823173ffb2b994eef921737afe8f5ab5ef788be3578149cfc2b0209fda1fcd8e",
+    "data/scores/gmm_baseline_provenance.json": "12d087b6076736c5409e8c172681a9846ab589aebc6ec57b228846c81d1cc857",
+    "results/ae_frozen_model_manifest.json": "ce256c2bc51fb765a12f79166b17516105bddee8de891cd3600ef0b03136ae91",
+    "results/phase2/ae_run_log.csv": "cf8efc07c3db9293dbb999f7c4f205418b75d19c292cc95caf825e614b604dcf",
+    "results/ae_seed_stability.md": "58793c0cbc907a568868024ee334e8e58ccb6368631e4c05ffc2a5766d0b1d02",
+    "results/phase2/gmm/threshold_manifest.json": "9ccf2e1208e411a82838a3f1fc801ed3b51e0e383f826f97bc434e84a2dfcdea",
+    "results/phase2/autoencoder/threshold_manifest.json": "eadf5f079643199da6d04b059e41ef7fc1f82bed116eab082e8291554b445bbe",
+    "results/phase2/paired/ranking.csv": "9a8c055bda226e08b36ba4418feab3dc29e29888b673c77c048e73cd11e1e976",
+    "results/phase2/paired/triage.csv": "f969f499a2db59c19db27da7dd91803562af5b0e008b2ff354ed41d2ce0f5518",
+    "results/phase2/paired/overlap.csv": "a60465527611082f751fbd0b1c79347467be96ffb8bac489c390ae8595db5247",
+    "results/phase2/paired/thresholds.csv": "eb7b36e20506d2aca78dbccdda5f886b4bcdf32b27368ac563cc67aa4a5d5f6a",
+    "results/phase2/paired/inference_provenance.json": "14e1c468d753b74b664e2bf1d1ab7d12b7a0443e0766a271c9eb52b8860a1047",
+    "results/phase2/paired/provenance.json": "711433da9750dd7776b5536c5cd4fbf61305c03f6580bb1d9e34dd1bab17b450",
+    "data/scores/gmm_test.csv": "7a5d0571a2c4291ed6d5f1bd929c9fe8560e0df7ecab2d0e8d89f139f75d8e0f",
+    "data/scores/autoencoder_test.csv": "65207b0972705333a0b378b1b3573ee9158be4156654e8bd4c864f8af265cdd3",
+    "data/scores/test_labels.csv": "9540799fa1875c2e7bec6a2e3d0921c766a4ef22841df7c4dfbdfa9e73bd6833",
+    "src/models/autoencoder.py": "0479a53d0974b4a13511158640f14856c0c43d43542eb7e2c2d867f9c1b2ec55"
+  }
+}
