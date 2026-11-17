@@ -1,0 +1,190 @@
+{
+  "source_dataset": {
+    "sha256": "76274b691b16a6c49d3f159c883398e03ccd6d1ee12d9d8ee38f4b4b98551a89",
+    "filename": "creditcard.csv"
+  },
+  "models": {
+    "gmm": {
+      "model_artifact": {
+        "path": "results/gmm_model.joblib",
+        "sha256": "5ac282181e19e97baf862599e65c8da8e88b2debf3db84f84e2762746eb03480"
+      },
+      "preprocessing_artifact": {
+        "path": "results/scaler_robust.joblib",
+        "sha256": "df06bee03c6d8e43124869b7c2c7eca8c00458d3f8bc4cb5d03245d3c964073a"
+      },
+      "split_manifest": {
+        "path": "data/split_manifest.json",
+        "sha256": "89f87ff166fd4438be88b58e77e133d3444124acb8f37f7eca1a6a123af7a7e3"
+      },
+      "validation_scores": {
+        "path": "data/scores/gmm_validation.csv",
+        "sha256": "03276204aa848b338d715125248581b5ec79348dbc0c269beda5e8b93988258e"
+      },
+      "validation_labels": {
+        "path": "data/scores/validation_labels.csv",
+        "sha256": "12e3c74b01c2ccdf3a9e94489f8b7767b34fb1ea9395d4a9e160cfe4b81fd307"
+      },
+      "validation_split_ids": {
+        "path": "data/splits/val_indices.csv",
+        "sha256": "edb3f6aa4f34b408cfbebbf93eb14407e8f8de67f5d287756583debe84c8860f"
+      },
+      "baseline_provenance": {
+        "path": "data/scores/gmm_baseline_provenance.json",
+        "sha256": "12d087b6076736c5409e8c172681a9846ab589aebc6ec57b228846c81d1cc857"
+      },
+      "calibration_code": {
+        "path": "src/threshold_calibration.py",
+        "sha256": "299c9ca1676acef290b50bd60928fc9f87dba62aaed8e356cf2f907e37c8c6a6"
+      },
+      "freeze_code": {
+        "path": "scripts/freeze_gmm_thresholds.py",
+        "sha256": "fdaf73038a306d107f8735e1f31a0d27569635335234d926ebfc4b7c218cfae7"
+      },
+      "feature_order": [
+        "V1",
+        "V2",
+        "V3",
+        "V4",
+        "V5",
+        "V6",
+        "V7",
+        "V8",
+        "V9",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V22",
+        "V23",
+        "V24",
+        "V25",
+        "V26",
+        "V27",
+        "V28",
+        "Amount_log"
+      ],
+      "preprocessing": "V1\u2013V28, log1p(Amount), Phase 1 RobustScaler fitted on legitimate training rows"
+    },
+    "autoencoder": {
+      "model_artifact": {
+        "path": "results/phase2/checkpoints/RUN-S2-W16-DNZ-S7.pt",
+        "sha256": "0d247ab9757cd3b15caeaba0049dd7825c8049998dd57a649307c87c64b4a1fb"
+      },
+      "preprocessing_artifact": {
+        "path": "data/artifacts/scaler_robust_phase2.joblib",
+        "sha256": "db0d17f42b9bbe08a975d59f38c486f78e7208356da0ccae985e43fdc7b97762"
+      },
+      "split_manifest": {
+        "path": "data/split_manifest.json",
+        "sha256": "89f87ff166fd4438be88b58e77e133d3444124acb8f37f7eca1a6a123af7a7e3"
+      },
+      "validation_scores": {
+        "path": "results/phase2/scores/RUN-S2-W16-DNZ-S7_scores_val.csv",
+        "sha256": "4a065fbb48fddd422c58874c71c19dcf0a1ce0abf6d7b1d0009eed317958e827"
+      },
+      "validation_labels": {
+        "path": "data/scores/validation_labels.csv",
+        "sha256": "12e3c74b01c2ccdf3a9e94489f8b7767b34fb1ea9395d4a9e160cfe4b81fd307"
+      },
+      "validation_split_ids": {
+        "path": "data/splits/val_indices.csv",
+        "sha256": "edb3f6aa4f34b408cfbebbf93eb14407e8f8de67f5d287756583debe84c8860f"
+      },
+      "model_selection_manifest": {
+        "path": "results/ae_frozen_model_manifest.json",
+        "sha256": "ce256c2bc51fb765a12f79166b17516105bddee8de891cd3600ef0b03136ae91"
+      },
+      "feature_metadata": {
+        "path": "data/artifacts/feature_metadata.json",
+        "sha256": "823173ffb2b994eef921737afe8f5ab5ef788be3578149cfc2b0209fda1fcd8e"
+      },
+      "calibration_code": {
+        "path": "src/threshold_calibration.py",
+        "sha256": "299c9ca1676acef290b50bd60928fc9f87dba62aaed8e356cf2f907e37c8c6a6"
+      },
+      "freeze_code": {
+        "path": "scripts/freeze_ae_thresholds.py",
+        "sha256": "6f763a736a26e63ba4601b195ed149be9b07a474d2fd11f7a78a40545966289f"
+      },
+      "feature_order": [
+        "V1",
+        "V2",
+        "V3",
+        "V4",
+        "V5",
+        "V6",
+        "V7",
+        "V8",
+        "V9",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V22",
+        "V23",
+        "V24",
+        "V25",
+        "V26",
+        "V27",
+        "V28",
+        "Amount_log"
+      ],
+      "preprocessing": "V1\u2013V28, log1p(Amount), Phase 2 RobustScaler fitted strictly on legitimate training rows (Issue #28)"
+    }
+  },
+  "threshold_manifests": {
+    "gmm": {
+      "path": "results/phase2/gmm/threshold_manifest.json",
+      "sha256": "9ccf2e1208e411a82838a3f1fc801ed3b51e0e383f826f97bc434e84a2dfcdea"
+    },
+    "autoencoder": {
+      "path": "results/phase2/autoencoder/threshold_manifest.json",
+      "sha256": "eadf5f079643199da6d04b059e41ef7fc1f82bed116eab082e8291554b445bbe"
+    }
+  },
+  "scoring_code": {
+    "path": "scripts/score_frozen_test.py",
+    "sha256": "85ee086bed18354b9d3975e072902d506b850abfb17f16fbd283f3cef32270f9"
+  },
+  "inference_code": {
+    "path": "src/models/autoencoder.py",
+    "sha256": "0479a53d0974b4a13511158640f14856c0c43d43542eb7e2c2d867f9c1b2ec55"
+  },
+  "rows": 42560,
+  "gmm_regenerated_max_absolute_difference": 2.842170943040401e-14,
+  "feature_matrix_max_absolute_difference": 0.0,
+  "ae_scores": {
+    "path": "data/scores/autoencoder_test.csv",
+    "sha256": "65207b0972705333a0b378b1b3573ee9158be4156654e8bd4c864f8af265cdd3"
+  },
+  "gmm_scores": {
+    "path": "data/scores/gmm_test.csv",
+    "sha256": "7a5d0571a2c4291ed6d5f1bd929c9fe8560e0df7ecab2d0e8d89f139f75d8e0f"
+  },
+  "inference_mode": "CPU, eval mode, no_grad, per-feature mean squared reconstruction error",
+  "python": "3.12.14",
+  "packages": {
+    "torch": "2.8.0",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.6.1",
+    "joblib": "1.5.3"
+  }
+}
