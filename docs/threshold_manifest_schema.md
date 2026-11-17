@@ -1,15 +1,20 @@
 # Validation threshold manifest v1.0
 
-Run from the repository root with the environment used for the shared evaluation utilities.
+Run from the repository root with the environment used for the shared evaluation utilities:
 
 ```sh
+# GMM Threshold Calibration & Verification
 python -m scripts.freeze_gmm_thresholds
 python -m scripts.freeze_gmm_thresholds --check
+
+# Autoencoder Threshold Calibration & Verification
+python -m scripts.freeze_ae_thresholds
+python -m scripts.freeze_ae_thresholds --check
 ```
 
-The first command writes results/phase2/gmm/threshold_manifest.json. The second recomputes calibration and checks the saved manifest for exact equality. Both use the committed validation score and label files. The external raw dataset and model deserialization are unnecessary.
+The GMM script writes `results/phase2/gmm/threshold_manifest.json`, and the Autoencoder script writes `results/phase2/autoencoder/threshold_manifest.json`. The `--check` flag recomputes calibration and checks the saved manifest for exact equality. Both use committed validation score and label files. The external raw dataset and model deserialization are unnecessary.
 
-The freeze checks byte hashes of the GMM, its Phase 1 scaler, split manifest, validation scores and labels against the #30 provenance. It also verifies exact validation membership against data/splits/val_indices.csv. The score loader validates model identity, split, finite values, unique stable IDs and the explicit higher-is-more-suspicious convention. Labels join by stable identity. Score direction is supported by the baseline's negative-log-likelihood implementation and artifact provenance.
+The freeze checks byte hashes of the model checkpoint/artifact, preprocessing scaler, split manifest, validation scores and labels against their respective provenance manifests (`data/scores/gmm_baseline_provenance.json` for GMM and `results/ae_frozen_model_manifest.json` for Autoencoder). It also verifies exact validation membership against `data/splits/val_indices.csv`. The score loader validates model identity, split, finite values, unique stable IDs and the explicit higher-is-more-suspicious convention. Labels join by stable identity.
 
 The manifest records these shared fields for each model.
 
@@ -42,3 +47,15 @@ Calibration uses 42,558 validation rows, including 55 frauds.
 | 5% | 39.18202235082998 | 0.872727 | 0.032468296 | 48 | 1380 |
 
 The actual FPR may be below its budget because the existing selection rule retains the highest threshold achieving maximum feasible recall. No test score files, labels or metrics enter calibration. Prior Phase 1 holdout exposure remains documented in the split contract. The saved provenance includes the baseline report's hash for traceability, while only its artifact identities are consumed.
+
+## Frozen Autoencoder result
+
+Calibration uses 42,558 validation rows, including 55 frauds, evaluated on the frozen Stage-2 Autoencoder checkpoint (`RUN-S2-W16-DNZ-S7`, seed 7, SHA-256 `0d247ab9...`).
+
+| FPR budget | Threshold | Validation recall | Actual validation FPR | TP | FP |
+|---|---:|---:|---:|---:|---:|
+| 0.1% | 4.156134128570557 | 0.472727 | 0.000823471 | 26 | 35 |
+| 1% | 0.8890547156333923 | 0.800000 | 0.008422935 | 44 | 358 |
+| 5% | 0.4582631587982178 | 0.836364 | 0.027292191 | 46 | 1160 |
+
+All derived thresholds satisfy their FPR budgets strictly on validation data without touching test metrics or test splits. The validation recall at 1% FPR (0.8000) and 5% FPR (0.8364) exactly corroborates the validation recall values recorded in the frozen model manifest `results/ae_frozen_model_manifest.json` and `results/phase2/ae_run_log.csv`. Infeasible FPR budgets, if encountered, are explicitly encoded as `status="no_alerts_within_budget"`, `decision="no_alerts"`, `threshold=null`.
