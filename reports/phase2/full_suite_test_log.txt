@@ -1,0 +1,44 @@
+Report verification
+Verification base: 4f83b78 (workflow integration merged)
+Command: python -m pytest -q
+Python: 3.12.14
+pytest==8.4.2
+numpy==2.0.2
+pandas==2.3.3
+scikit-learn==1.6.1
+torch==2.8.0
+joblib==1.5.3
+Raw data: data/creditcard.csv (ULB checksum verified by data tests)
+
+sss................................................................F.... [ 66%]
+.....................................                                    [100%]
+=================================== FAILURES ===================================
+___ FinalArtifactTests.test_inference_inputs_and_score_hashes_match_receipt ____
+
+self = <test_paired_evaluation.FinalArtifactTests testMethod=test_inference_inputs_and_score_hashes_match_receipt>
+
+    def test_inference_inputs_and_score_hashes_match_receipt(self):
+        from src.threshold_calibration import artifact_identity
+        evidence = json.loads(Path("results/phase2/paired/inference_provenance.json").read_text())
+        for key in ("ae_scores", "gmm_scores", "scoring_code", "inference_code"):
+            identity = evidence[key]
+>           self.assertEqual(artifact_identity(identity["path"]), identity)
+E           AssertionError: {'pat[39 chars]6': '7dc90ff31a83d87ac54d436c397e17910508501e6[20 chars]f12'} != {'pat[39 chars]6': '0479a53d0974b4a13511158640f14856c0c43d435[20 chars]c55'}
+E             {'path': 'src/models/autoencoder.py',
+E           -  'sha256': '7dc90ff31a83d87ac54d436c397e17910508501e6a3987c0095cee3a28264f12'}
+E           +  'sha256': '0479a53d0974b4a13511158640f14856c0c43d43542eb7e2c2d867f9c1b2ec55'}
+
+tests/test_paired_evaluation.py:114: AssertionError
+=============================== warnings summary ===============================
+tests/test_orchestration.py::OrchestrationTests::test_end_to_end_pipeline_execution
+  /tmp/cft-final-env/lib/python3.12/site-packages/joblib/externals/loky/backend/context.py:131: UserWarning: Could not find the number of physical cores for the following reason:
+  invalid literal for int() with base 10: ''
+  Returning the number of logical cores instead. You can silence this warning by setting LOKY_MAX_CPU_COUNT to the number of cores you want to use.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_paired_evaluation.py::FinalArtifactTests::test_inference_inputs_and_score_hashes_match_receipt
+1 failed, 105 passed, 3 skipped, 1 warning in 15.47s
+
+Exit code: 1
