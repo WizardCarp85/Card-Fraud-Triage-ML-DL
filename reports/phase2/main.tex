@@ -66,7 +66,7 @@ GMM uses its frozen Phase 1 scaler and AE its frozen Phase 2 scaler. Final infer
 Labels support legitimate-row filtering, validation model selection and evaluation. The protocol therefore uses legitimate-only fitting with labeled validation selection. This requires reliable historical labels for those purposes.
 
 \subsection{Prior Holdout Exposure}
-The test partition was examined during Phase 1. Phase 2 uses it as a historical comparison set with known prior exposure. Architecture decisions and threshold calibration use validation data. Models and policies are frozen before the paired test evaluation. No model or threshold adjustment follows the reported test results.
+The test partition was examined during Phase 1. Phase 2 uses it as a historical comparison set with known prior exposure. Architecture decisions and threshold calibration use validation data. Models and policies are frozen before the paired test evaluation. No model or threshold adjustment follows the reported test results. Figure~\ref{fig:workflow} illustrates the end-to-end data pipeline, model fitting, validation calibration and paired test evaluation workflow.
 
 \begin{figure}[!ht]\centering
 \begin{tikzpicture}[x=1cm,y=.85cm,

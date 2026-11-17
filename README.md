@@ -44,10 +44,11 @@ In high-throughput payment systems, fraud analysts can manually investigate only
 
 ```mermaid
 flowchart LR
-    Raw["creditcard.csv\n(284,807 rows)"] --> Split["Chronological Split\n(data/split_manifest.json)"]
-    Split --> Train["Train Partition (70%)\n199,364 rows"]
+    Raw["creditcard.csv\n(284,807 rows)"] --> Dedup["Deduplication\n(drop 1,081 duplicates -> 283,726 rows)"]
+    Dedup --> Split["Chronological Split\n(data/split_manifest.json)"]
+    Split --> Train["Train Partition (70%)\n198,608 rows (366 fraud)"]
     Split --> Val["Validation Partition (15%)\n42,558 rows (55 fraud)"]
-    Split --> Test["Test Partition (15%)\n42,885 rows (52 fraud)"]
+    Split --> Test["Test Partition (15%)\n42,560 rows (52 fraud)"]
     Train --> TrainLegit["train_legit (198,242 rows)\nZero Fraud Rows"]
     TrainLegit --> Preprocessing["RobustScaler\nFitted ONLY on train_legit"]
     Preprocessing --> Models["Fit GMM & Train Autoencoder\nStrictly Unsupervised"]
@@ -58,7 +59,7 @@ flowchart LR
 ```
 
 ### Protocol Guarantees
-1. **Chronological Temporal Split**: Partitions preserve real-world causality: 70% Train (rows 0–199,363), 15% Validation (rows 199,364–241,921), 15% Test (rows 241,922–284,806). Exact boundary index mappings and SHA-256 digests are locked in [`data/split_manifest.json`](file:///Users/Wizard/Documents/Projects/Working/Card-Fraud-Triage-ML-DL/data/split_manifest.json).
+1. **Chronological Temporal Split**: Partitions preserve real-world causality across deduplicated data: 70% Train (198,608 rows, elapsed time $0.0\text{s} \to 132,906.0\text{s}$), 15% Validation (42,558 rows, $132,906.0\text{s} \to 151,320.0\text{s}$), 15% Test (42,560 rows, $151,320.0\text{s} \to 172,792.0\text{s}$). Boundary timestamp collisions are deterministically resolved by immutable raw row IDs (boundary tie-breaker rows 199323/199324 at 132,906.0s and 242066/242063–242065 at 151,320.0s). Exact boundary index mappings and SHA-256 digests are locked in [`data/split_manifest.json`](data/split_manifest.json).
 2. **Legitimate-Only Training Rule**: Under the unsupervised anomaly detection paradigm, model training represents only normal transaction density. All historical fraud rows are excluded from `train_legit` (198,242 rows; 0 fraud). `RobustScaler` is fitted *strictly* on `train_legit`; labels (`Class`) are never seen by any model.
 3. **Validation-Only Hyperparameter Tuning & Threshold Calibration**: Model selection (latent dimension, denoising variance, seed stability) and operational threshold calibration across FPR budgets (0.1%, 1%, 5%) are derived exclusively on validation scores and labels. No holdout test labels or scores enter calibration.
 4. **Frozen Holdout Test Evaluation**: Test evaluation consumes pre-calibrated frozen thresholds and frozen weights. Training (`.fit()`) and threshold adjustment (`select_threshold_at_fpr()`) are programmatically forbidden during test evaluation.
@@ -148,7 +149,7 @@ On the holdout test partition (42,560 evaluated transactions, 52 fraud cases), b
 ### Full Ranking Metrics
 | Model | Test AP (PR-AUC) | Test ROC-AUC | Validation AP | Selection Status |
 |:---|:---:|:---:|:---:|:---:|
-| **Gaussian Mixture Model (GMM)** | **0.6773** | 0.9067 | 0.6970 | Phase 1 Baseline Benchmark |
+| **Gaussian Mixture Model (GMM)** | **0.6773** | 0.9067 | 0.6510 | Phase 1 Baseline Benchmark |
 | **Denoising Autoencoder (AE)** | 0.4867 | **0.9199** | 0.3245 | Frozen Candidate (`RUN-S2-W16-DNZ-S7`) |
 
 ### Operational Performance at Pre-Calibrated Validation Thresholds
@@ -238,7 +239,7 @@ python -m scripts.evaluate_frozen_pair \
   --ae-scores data/scores/autoencoder_test.csv \
   --ae-thresholds results/phase2/autoencoder/threshold_manifest.json
 
-# 5. Run complete repository test suite (98+ unit and integration tests)
+# 5. Run complete repository test suite (105+ unit and integration tests)
 python -m unittest discover tests
 ```
 
@@ -312,6 +313,9 @@ Card-Fraud-Triage-ML-DL/
 │   ├── model_card.md                          # Frozen AE model card and limitations
 │   ├── paired_evaluation.md                   # Protocol for paired test comparison
 │   └── threshold_manifest_schema.md           # Schema for threshold manifests
+├── presentation/
+│   ├── Phase1_Slides.pdf                      # Phase 1 project presentation slides
+│   └── Phase2.pdf                             # Phase 2 final submission presentation slides
 ├── reports/
 │   ├── report.pdf                             # Phase 1 technical report
 │   └── phase2/                                # Phase 2 technical report (IEEE format)

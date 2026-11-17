@@ -1,132 +1,172 @@
 # Autoencoder Theory, Architecture & Anomaly‑Score Rationale
 
 **Issue #39** – *Document autoencoder theory, architecture and anomaly‑score rationale*  
-Owner: Rudra Pratap Singh Choudhary
+**Owner:** Rudra Pratap Singh Choudhary  
+**Status:** Updated & Aligned with Merged Phase 2 Implementation (Issues #32, #34, #35, #36, #43)
 
 ---
 
 ## 1. Overview
-This methods note explains **why** a reconstruction‑based autoencoder is used for credit‑card fraud detection, **how** the specific under‑complete autoencoder implementation in the repository works, and **how** the reconstruction error is transformed into an anomaly score.  It draws on peer‑reviewed literature and reputable tutorials while staying faithful to the actual code in **Issue #32** (model training) and **Issue #34** (scoring & checkpoint‑safe inference).
+This methods note explains **why** a reconstruction‑based autoencoder is used for credit‑card fraud triage, **how** the specific undercomplete denoising autoencoder implementation in the repository works, and **how** the reconstruction error is transformed into an anomaly score. It synthesizes literature from anomaly detection and representation learning while staying faithful to the merged implementation in `src/models/autoencoder.py` and the frozen checkpoint in `results/ae_frozen_model_manifest.json`.
 
 ---
 
 ## 2. Theory of Autoencoders for Anomaly Detection
 
 | Concept | Description |
-|--------|-------------|
-| **Autoencoder** | A neural network that learns to map an input vector \(\mathbf{x}\) to a latent representation \(\mathbf{z}\) (encoder) and then back to a reconstruction \(\hat{\mathbf{x}}\) (decoder). The network is trained to minimise a reconstruction loss \(L(\mathbf{x},\hat{\mathbf{x}})\). |
-| **Under‑complete bottleneck** | The latent space dimension \(d_{\text{latent}}\) is deliberately chosen **smaller** than the input dimension. This forces the model to capture only the most salient structure of the data, discarding noise. |
-| **Reconstruction‑error‑based anomaly detection** | If the training data consist **solely of legitimate (non‑fraud) transactions**, the autoencoder learns a compact manifold that well‑represents normal behaviour. When a fraudulent transaction – which lies off this manifold – is passed through the network, the reconstruction error \(\|\mathbf{x}-\hat{\mathbf{x}}\|\) becomes large. The error therefore serves as a **proxy anomaly score**. |
+|---|---|
+| **Autoencoder** | A neural network parameterized by encoder $f_\theta$ and decoder $g_\phi$ that learns to map an input vector $\mathbf{x} \in \mathbb{R}^{29}$ to a lower-dimensional latent representation $\mathbf{z} \in \mathbb{R}^{16}$ and reconstruct it as $\hat{\mathbf{x}} = g_\phi(\mathbf{z}) \in \mathbb{R}^{29}$. |
+| **Undercomplete Bottleneck** | The latent bottleneck dimension ($d_{\text{latent}} = 16$) is strictly smaller than the input dimension ($D = 29$). This bottleneck constrains information capacity, compelling the network to capture the primary manifold regularities of legitimate spending behavior while discarding uncorrelated noise. |
+| **Denoising Regularization** | Following Vincent et al. (2008), corrupted inputs $\widetilde{\mathbf{x}} = \mathbf{x} + \boldsymbol{\epsilon}$ (where $\boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, 0.5^2 \mathbf{I})$ in scaled feature space) are passed during training while forcing reconstruction of the clean input $\mathbf{x}$. This teaches the network contractive projections toward the legitimate manifold. Denoising noise is applied strictly during training on legitimate data; inference consumes clean inputs. |
+| **Reconstruction-Error Anomaly Scoring** | Because the model is trained exclusively on legitimate transactions (`train_legit`, $N = 198,242$, zero frauds), it learns the manifold of legitimate behavior. Fraudulent transactions departing from this manifold incur elevated reconstruction error $\|\mathbf{x} - \hat{\mathbf{x}}\|_2^2 / 29$, serving as an anomaly score for operational triage ranking. |
 
-### Key Papers & Tutorials
-1. **Hawkins, S., et al. (2002)** – *Outlier Detection Using Replicated Neural Networks* (classic reference for reconstruction‑based anomaly detection).  
-2. **Sakurada, M., & Yairi, T. (2014)** – *Anomaly Detection Using Autoencoders with Non‑linear Dimensionality Reduction* (applied to industrial sensor data).  
-3. **Koch, G., et al. (2019)** – *Deep Autoencoding Gaussian Mixture Model for Unsupervised Anomaly Detection* (provides a comprehensive survey).  
-4. **TensorFlow/Keras tutorial** – *Autoencoders* (https://www.tensorflow.org/tutorials/generative/autoencoder) – used as a practical implementation guide.
+### Key Theoretical References
+1. **Sakurada, M., & Yairi, T. (2014)** – *Anomaly Detection Using Autoencoders with Nonlinear Dimensionality Reduction*. Proc. MLSDA, pp. 4–11.
+2. **Vincent, P., Larochelle, H., Bengio, Y., & Manzagol, P.-A. (2008)** – *Extracting and Composing Robust Features with Denoising Autoencoders*. Proc. ICML, pp. 1096–1103.
+3. **Hawkins, S., He, H., Williams, C., & Baxter, R. (2002)** – *Outlier Detection Using Replicated Neural Networks*. Proc. ICANN, pp. 1260–1265.
+4. **Dempster, A. P., Laird, N. M., & Rubin, D. B. (1977)** – *Maximum Likelihood from Incomplete Data via the EM Algorithm*. J. Royal Stat. Soc., Series B, 39(1):1–38.
 
 ---
 
-## 3. Implemented Architecture (Issue #32)
-The repository implements a **single‑layer under‑complete autoencoder** in `src/models/autoencoder.py`.
+## 3. Implemented Architecture (`src/models/autoencoder.py`)
+
+The production network is implemented in `src/models/autoencoder.py` as `PyTorchAutoencoderNet`, adhering to Addendum A1 of `docs/ae_experiment_plan.md` and frozen checkpoint `RUN-S2-W16-DNZ-S7`.
 
 ```python
-class AutoEncoder(nn.Module):
-    def __init__(self, input_dim: int, latent_dim: int = 16):
-        super().__init__()
-        # Encoder
-        self.encoder = nn.Sequential(
-            nn.Linear(input_dim, 64),
-            nn.ReLU(inplace=True),
-            nn.Linear(64, latent_dim),
-        )
-        # Decoder – mirrors the encoder
-        self.decoder = nn.Sequential(
-            nn.Linear(latent_dim, 64),
-            nn.ReLU(inplace=True),
-            nn.Linear(64, input_dim),
-        )
-        self.loss = nn.MSELoss(reduction="mean")
+class PyTorchAutoencoderNet(nn.Module):
+    """Symmetric feedforward autoencoder architecture."""
 
-    def forward(self, x):
-        z = self.encoder(x)
-        recon = self.decoder(z)
-        return recon
+    def __init__(
+        self,
+        input_dim: int = 29,
+        latent_dim: int = 16,
+        hidden_dims: tuple[int, ...] = (32,),
+    ) -> None:
+        super().__init__()
+        # Encoder: 29 -> 32 -> 16
+        encoder_layers: list[nn.Module] = []
+        current_dim = input_dim
+        for h_dim in hidden_dims:
+            encoder_layers.append(nn.Linear(current_dim, h_dim))
+            encoder_layers.append(nn.BatchNorm1d(h_dim))
+            encoder_layers.append(nn.LeakyReLU(negative_slope=0.1))
+            current_dim = h_dim
+        encoder_layers.append(nn.Linear(current_dim, latent_dim))
+        self.encoder = nn.Sequential(*encoder_layers)
+
+        # Decoder: 16 -> 32 -> 29
+        decoder_layers: list[nn.Module] = []
+        current_dim = latent_dim
+        for h_dim in reversed(hidden_dims):
+            decoder_layers.append(nn.Linear(current_dim, h_dim))
+            decoder_layers.append(nn.BatchNorm1d(h_dim))
+            decoder_layers.append(nn.LeakyReLU(negative_slope=0.1))
+            current_dim = h_dim
+        decoder_layers.append(nn.Linear(current_dim, input_dim))
+        self.decoder = nn.Sequential(*decoder_layers)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        latent = self.encoder(x)
+        return self.decoder(latent)
 ```
 
-### Architecture Details
-| Component | Size | Activation |
-|-----------|------|------------|
-| Input layer | 30 (number of numeric features after preprocessing) | – |
-| Hidden encoder layer | 64 | ReLU |
-| Latent bottleneck | 16 (configurable via `latent_dim`) | – |
-| Hidden decoder layer | 64 | ReLU |
-| Output layer | 30 | – |
+### Architectural Specifications
+| Layer Stage | Input Dimension | Output Dimension | Activation / Normalization | Function |
+|---|:---:|:---:|---|---|
+| **Input** | – | 29 | – | Continuous features ($V_1,\dots,V_{28}, \log_{1p}(\text{Amount})$) |
+| **Encoder Hidden** | 29 | 32 | `BatchNorm1d` + `LeakyReLU(negative_slope=0.1)` | Non-linear feature contraction |
+| **Bottleneck Latent** | 32 | 16 | Linear (unconstrained coordinates) | Salient manifold representation |
+| **Decoder Hidden** | 16 | 32 | `BatchNorm1d` + `LeakyReLU(negative_slope=0.1)` | Symmetric latent expansion |
+| **Output Reconstruction** | 32 | 29 | Linear (identity mapping) | Reconstructed feature vector $\hat{\mathbf{x}}$ |
 
-*The network is trained with **Mean‑Squared Error (MSE)** loss on **only legitimate training samples** (`train_legit` split).*  
-Training hyper‑parameters (learning rate, epochs, batch size) are defined in `src/config.py` under the `autoencoder` section.
+- **Loss Objective:** Mean Squared Error (MSE) across the 29 features:
+  $$\mathcal{L}_{\text{MSE}}(\mathbf{x}, \hat{\mathbf{x}}) = \frac{1}{29} \sum_{j=1}^{29} (x_j - \hat{x}_j)^2$$
+- **Training Noise:** Additive Gaussian noise $\sigma = 0.5$ on inputs, targets uncorrupted.
+- **Optimization:** Adam optimizer, $\text{LR} = 1\times 10^{-3}$, batch size 256, weight decay 0.0, early stopping patience 10 on legitimate validation loss.
+- **Training Population:** Strictly legitimate transactions (`train_legit`, $N = 198,242$). Fraud records are excised during training.
 
 ---
 
-## 4. Scoring & Checkpoint‑Safe Inference (Issue #34)
+## 4. Scoring & Checkpoint‑Safe Inference Interface
+
 ### 4.1 Scoring Function
+Anomaly scoring is implemented in `AutoencoderAnomalyModel.score`:
 ```python
 def score(self, X: np.ndarray) -> np.ndarray:
-    """Return per‑sample reconstruction MSE.
-    Higher values indicate larger deviation from the learned normal manifold.
-    """
-    self.model.eval()
+    """Compute per-sample reconstruction Mean Squared Error (MSE)."""
+    self.network.eval()
     with torch.no_grad():
-        X_tensor = torch.from_numpy(X).float().to(self.device)
-        recon = self.model(X_tensor)
-        mse = ((X_tensor - recon) ** 2).mean(dim=1).cpu().numpy()
-    return mse
+        X_tensor = torch.from_numpy(X.astype(np.float32)).to(self.device)
+        recon = self.network(X_tensor)
+        errors = torch.mean((X_tensor - recon) ** 2, dim=1).cpu().numpy()
+    return errors.astype(np.float64)
 ```
-The function outputs a **single scalar per transaction** – the mean squared reconstruction error across all input dimensions.
 
-### 4.2 Contract‑Compliant CSV Export
-`run_evaluation` now records scores with the required columns (`row_id, split, model, anomaly_score`). The `model` field is filled with the literal string **`autoencoder`**.
+- **Score Direction:** `higher_is_more_suspicious`. Transactions with high reconstruction error are prioritized in the triage queue.
+- **Determinism:** Evaluated with gradients disabled (`torch.no_grad()`) in evaluation mode (`eval()`). Re-scoring yields bit-identical outputs ($\max |\Delta| = 0.0$).
 
-### 4.3 Checkpoint Safety
-* The model is saved after training as `autoencoder.pt` together with a JSON metadata file (`autoencoder_meta.json`).
-* During inference the checkpoint is **loaded deterministically** (same weight initialisation, same device placement, no stochastic layers). As a result, re‑scoring the same validation data after loading the checkpoint yields identical anomaly scores (verified by a reproducibility test in `tests/test_autoencoder_baseline.py`).
+### 4.2 Score Export Contract
+Exported score files comply with `docs/score_file_schema.md`:
+- Columns: `row_id,split,model,anomaly_score`
+- Model identifier: `autoencoder`
+- Row ID: Immutable raw 0-based dataset row index.
 
----
-
-## 5. Limitations & Failure Modes
-1. **Overlap of fraud & legitimate manifolds** – Some fraud patterns may still be well‑reconstructed because they share feature statistics with normal transactions; the autoencoder will assign low anomaly scores to them.
-2. **Feature engineering dependence** – The model operates on the **scaled numeric features** produced by `PreprocessingPipeline`. Any drift in feature distribution (e.g., new transaction types) can degrade detection.
-3. **Single‑scalar score** – Only the average reconstruction error is used. More sophisticated metrics (e.g., Mahalanobis distance in latent space) could capture subtle deviations.
-4. **Capacity limitation** – The bottleneck size (default 16) is a design trade‑off; too small may under‑fit, too large may over‑fit and reconstruct anomalies.
+### 4.3 Checkpoint Governance
+The production checkpoint is frozen at `results/phase2/checkpoints/RUN-S2-W16-DNZ-S7.pt` (SHA-256 `0d247ab9757cd3b15caeaba0049dd7825c8049998dd57a649307c87c64b4a1fb`) per `results/ae_frozen_model_manifest.json`.
 
 ---
 
-## 6. Architecture Diagram
+## 5. Architectural Flow Diagram
+
 ```mermaid
 flowchart TD
-    subgraph Input[Preprocessed Feature Vector]
-        I[Feature Vector \(30 dims)];
+    subgraph InputStage["Preprocessed Input Vector (29 Features)"]
+        X["V1..V28 + log1p(Amount)\n(29 continuous dimensions)"]
     end
-    I -->|Linear 30→64| E1[Encoder Layer 1\nReLU]
-    E1 -->|Linear 64→16| Z[Latent Bottleneck]
-    Z -->|Linear 16→64| D1[Decoder Layer 1\nReLU]
-    D1 -->|Linear 64→30| R[Reconstruction]
-    R -->|MSE| Score[Reconstruction Error]
-    style I fill:#e3f2fd,stroke:#90caf9,stroke-width:2px;
-    style Z fill:#fff59d,stroke:#fdd835,stroke-width:2px;
-    style Score fill:#ffcc80,stroke:#fb8c00,stroke-width:2px;
+
+    subgraph Encoder["Encoder Subnetwork"]
+        E1["Linear (29 -> 32)"] --> BN1["BatchNorm1d + LeakyReLU (slope=0.1)"]
+        BN1 --> E2["Linear (32 -> 16)"]
+    end
+
+    subgraph Latent["Latent Bottleneck"]
+        Z["Latent Space z\n(16 linear units)"]
+    end
+
+    subgraph Decoder["Decoder Subnetwork"]
+        D1["Linear (16 -> 32)"] --> BN2["BatchNorm1d + LeakyReLU (slope=0.1)"]
+        BN2 --> D2["Linear (32 -> 29)"]
+    end
+
+    subgraph OutputStage["Reconstruction & Scoring"]
+        X_hat["Reconstructed Vector x_hat\n(29 continuous dimensions)"]
+        Loss["MSE Loss: ||x - x_hat||^2 / 29\n(Anomaly Score: higher = suspicious)"]
+    end
+
+    X --> E1
+    E2 --> Z
+    Z --> D1
+    D2 --> X_hat
+    X -.->|Clean Input| Loss
+    X_hat --> Loss
+
+    style X fill:#e3f2fd,stroke:#1976d2,stroke-width:2px;
+    style Z fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
+    style Loss fill:#fbe9e7,stroke:#d84315,stroke-width:2px;
 ```
-*Diagram reflects the exact layer sizes and activation functions used in the code.*
 
 ---
 
-## 7. References
-1. Hawkins, S., He, H., & Basak, J. (2002). *Outlier detection using replicated neural networks*. In Proceedings of the 13th International Conference on Neural Information Processing Systems (NIPS).  
-2. Sakurada, M., & Yairi, T. (2014). *Anomaly Detection Using Autoencoders with Non‑linear Dimensionality Reduction*. Proceedings of the MLSDA 2014.  
-3. Koch, G., Zemel, R., & Salakhutdinov, R. (2019). *Deep Autoencoding Gaussian Mixture Model for Unsupervised Anomaly Detection*. arXiv:1906.02371.  
-4. TensorFlow Documentation – *Autoencoders*. https://www.tensorflow.org/tutorials/generative/autoencoder  
-5. The repository’s implementation – `src/models/autoencoder.py` (Issue #32) and scoring logic in `src/run.py` / `src/evaluation_runner.py` (Issue #34).
+## 6. Known Limitations & Failure Modes
+1. **Reconstruction False Negatives on Subtle Frauds:** Sophisticated frauds mimicking normal transaction amounts and behavioral PCA coordinates reconstruct with low error, resulting in false negatives.
+2. **Uncalibrated Metric:** Reconstruction MSE is a geometric distance metric in feature space, not a calibrated posterior fraud probability $P(\text{Class}=1 \mid \mathbf{x})$.
+3. **No Direct Account/Temporal Context:** Time is excluded from input features to prevent time-decay artifacts, which limits detection of rapid transaction bursts across short intervals.
+4. **Single-Scalar Compression:** Using average MSE compresses 29 dimensional residuals into a single scalar; localized anomalies on single features may be diluted.
 
 ---
 
-**Prepared for inclusion in the final project report.**  
-If any phrasing or diagram detail needs adjustment, let me know and I’ll edit the note accordingly.
+## 7. Handover and Report Traceability
+This methods document serves as the foundational technical description for:
+- **Technical Report (Section IV-B):** `reports/phase2/main.tex` and `reports/phase2/main.pdf`
+- **Model Card (Sections 1–4):** `docs/model_card.md`
+- **Paired Evaluation:** `docs/paired_evaluation.md` and `results/phase2/paired/`
