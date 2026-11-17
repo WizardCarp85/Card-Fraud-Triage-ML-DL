@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "model": "autoencoder",
+  "calibration_split": "validation",
+  "score_direction": "higher_is_more_suspicious",
+  "score_transform": "(1 / 29) * sum((x_j - x_hat_j)^2)",
+  "selection_rule": "maximum validation recall within FPR budget; highest threshold breaks recall ties",
+  "validation_rows": 42558,
+  "validation_fraud_rows": 55,
+  "thresholds": [
+    {
+      "fpr_budget": 0.001,
+      "threshold": 4.156134128570557,
+      "validation_recall": 0.4727272727272727,
+      "validation_fpr": 0.0008234712843799262,
+      "true_positives": 26,
+      "false_positives": 35,
+      "status": "ok",
+      "decision": "score_gte_threshold",
+      "reason": null
+    },
+    {
+      "fpr_budget": 0.01,
+      "threshold": 0.8890547156333923,
+      "validation_recall": 0.8,
+      "validation_fpr": 0.00842293485165753,
+      "true_positives": 44,
+      "false_positives": 358,
+      "status": "ok",
+      "decision": "score_gte_threshold",
+      "reason": null
+    },
+    {
+      "fpr_budget": 0.05,
+      "threshold": 0.4582631587982178,
+      "validation_recall": 0.8363636363636363,
+      "validation_fpr": 0.02729219113944898,
+      "true_positives": 46,
+      "false_positives": 1160,
+      "status": "ok",
+      "decision": "score_gte_threshold",
+      "reason": null
+    }
+  ],
+  "provenance": {
+    "model_artifact": {
+      "path": "results/phase2/checkpoints/RUN-S2-W16-DNZ-S7.pt",
+      "sha256": "0d247ab9757cd3b15caeaba0049dd7825c8049998dd57a649307c87c64b4a1fb"
+    },
+    "preprocessing_artifact": {
+      "path": "data/artifacts/scaler_robust_phase2.joblib",
+      "sha256": "db0d17f42b9bbe08a975d59f38c486f78e7208356da0ccae985e43fdc7b97762"
+    },
+    "split_manifest": {
+      "path": "data/split_manifest.json",
+      "sha256": "89f87ff166fd4438be88b58e77e133d3444124acb8f37f7eca1a6a123af7a7e3"
+    },
+    "validation_scores": {
+      "path": "results/phase2/scores/RUN-S2-W16-DNZ-S7_scores_val.csv",
+      "sha256": "4a065fbb48fddd422c58874c71c19dcf0a1ce0abf6d7b1d0009eed317958e827"
+    },
+    "validation_labels": {
+      "path": "data/scores/validation_labels.csv",
+      "sha256": "12e3c74b01c2ccdf3a9e94489f8b7767b34fb1ea9395d4a9e160cfe4b81fd307"
+    },
+    "validation_split_ids": {
+      "path": "data/splits/val_indices.csv",
+      "sha256": "edb3f6aa4f34b408cfbebbf93eb14407e8f8de67f5d287756583debe84c8860f"
+    },
+    "model_selection_manifest": {
+      "path": "results/ae_frozen_model_manifest.json",
+      "sha256": "ce256c2bc51fb765a12f79166b17516105bddee8de891cd3600ef0b03136ae91"
+    },
+    "feature_metadata": {
+      "path": "data/artifacts/feature_metadata.json",
+      "sha256": "823173ffb2b994eef921737afe8f5ab5ef788be3578149cfc2b0209fda1fcd8e"
+    },
+    "calibration_code": {
+      "path": "src/threshold_calibration.py",
+      "sha256": "299c9ca1676acef290b50bd60928fc9f87dba62aaed8e356cf2f907e37c8c6a6"
+    },
+    "freeze_code": {
+      "path": "scripts/freeze_ae_thresholds.py",
+      "sha256": "6f763a736a26e63ba4601b195ed149be9b07a474d2fd11f7a78a40545966289f"
+    },
+    "feature_order": [
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V5",
+      "V6",
+      "V7",
+      "V8",
+      "V9",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18",
+      "V19",
+      "V20",
+      "V21",
+      "V22",
+      "V23",
+      "V24",
+      "V25",
+      "V26",
+      "V27",
+      "V28",
+      "Amount_log"
+    ],
+    "preprocessing": "V1\u2013V28, log1p(Amount), Phase 2 RobustScaler fitted strictly on legitimate training rows (Issue #28)"
+  }
+}

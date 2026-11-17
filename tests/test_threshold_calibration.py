@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from scripts.freeze_ae_thresholds import build_manifest as build_ae_manifest
 from scripts.freeze_gmm_thresholds import build_manifest
 from src.threshold_calibration import calibrate_validation
 
@@ -59,10 +60,40 @@ class CalibrationTests(unittest.TestCase):
             self.assertLessEqual(row["validation_fpr"], row["fpr_budget"])
 
     def test_modified_model_hash_is_rejected(self):
-        with patch("scripts.freeze_gmm_thresholds.artifact_identity",
-                   return_value={"path": "model", "sha256": "wrong"}):
-            with self.assertRaisesRegex(ValueError, "hash mismatch"):
-                build_manifest()
+        with (
+            patch("scripts.freeze_gmm_thresholds.artifact_identity", return_value={"path": "model", "sha256": "wrong"}),
+            self.assertRaisesRegex(ValueError, "hash mismatch"),
+        ):
+            build_manifest()
+
+    def test_saved_ae_manifest_reproduces_without_opening_test_artifacts(self):
+        original_open = Path.open
+
+        def guarded_open(path, *args, **kwargs):
+            if "test" in path.name:
+                raise AssertionError(f"Test artifact read during calibration: {path}")
+            return original_open(path, *args, **kwargs)
+
+        with patch.object(Path, "open", guarded_open):
+            actual = build_ae_manifest()
+        saved = json.loads(Path("results/phase2/autoencoder/threshold_manifest.json").read_text())
+        self.assertEqual(actual, saved)
+        self.assertEqual(actual["validation_rows"], 42558)
+        self.assertEqual(actual["validation_fraud_rows"], 55)
+        self.assertEqual([r["true_positives"] for r in actual["thresholds"]], [26, 44, 46])
+        self.assertEqual([r["false_positives"] for r in actual["thresholds"]], [35, 358, 1160])
+        for row in actual["thresholds"]:
+            self.assertLessEqual(row["validation_fpr"], row["fpr_budget"])
+            self.assertEqual(row["status"], "ok")
+            self.assertEqual(row["decision"], "score_gte_threshold")
+            self.assertIsNone(row["reason"])
+
+    def test_modified_ae_hash_is_rejected(self):
+        with (
+            patch("scripts.freeze_ae_thresholds.artifact_identity", return_value={"path": "model", "sha256": "wrong"}),
+            self.assertRaisesRegex(ValueError, "hash mismatch"),
+        ):
+            build_ae_manifest()
 
 
 if __name__ == "__main__":

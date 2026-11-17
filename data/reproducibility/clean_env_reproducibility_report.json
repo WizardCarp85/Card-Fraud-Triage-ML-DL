@@ -1,0 +1,130 @@
+{
+  "environment": {
+    "python": "3.9.6",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "scikit_learn": "1.6.1",
+    "joblib": "1.5.3",
+    "torch": "2.8.0"
+  },
+  "source": {
+    "ok": true,
+    "sha256": "76274b691b16a6c49d3f159c883398e03ccd6d1ee12d9d8ee38f4b4b98551a89",
+    "expected_sha256": "76274b691b16a6c49d3f159c883398e03ccd6d1ee12d9d8ee38f4b4b98551a89"
+  },
+  "splits": {
+    "ok": true,
+    "integrity": "PASSED",
+    "manifest_identical_excluding_content_hashes": true,
+    "manifest_differing_top_level_keys": [],
+    "content_hashes": {
+      "ok": true,
+      "committed_hashes_reproduced_by_parser": [
+        "round_trip"
+      ],
+      "per_parser_match": {
+        "default": {
+          "train": false,
+          "val": false,
+          "test": false,
+          "train_legit": false
+        },
+        "round_trip": {
+          "train": true,
+          "val": true,
+          "test": true,
+          "train_legit": true
+        }
+      },
+      "default_vs_round_trip_max_abs_diff": 9.90960785651751e-17,
+      "default_vs_round_trip_within_feature_tolerance": true,
+      "labels_identical_across_parsers": true
+    },
+    "split_csvs_identical": {
+      "train": true,
+      "val": true,
+      "test": true,
+      "train_legit": true
+    },
+    "row_id_sha256": {
+      "train": "b90864ca64fa8991c4abc15d462512ca4390136e9f19604489d921c18de27d14",
+      "val": "deabfee863952c05a12672016146eb17fe789dec5e3dbbe3d909a451315415eb",
+      "test": "21f731bd66437e2bb25a202c2086e718d681c357469d93635433bde54c78c7ad",
+      "train_legit": "438384b3c5be6713192c6c9a41f0fdcac06e7b14b98aba7f8e8eaaea4fb1bbf9"
+    }
+  },
+  "preprocessing": {
+    "ok": true,
+    "verification_status": "PASSED",
+    "repeated_runs_bit_identical": true,
+    "scaler_matches_committed_metadata_within_tolerance": true,
+    "scaler_matches_committed_joblib_within_tolerance": true,
+    "scaler_max_abs_diff_vs_committed": 0.0,
+    "tolerance": {
+      "rtol": 1e-09,
+      "atol": 1e-12
+    },
+    "feature_metadata_fields_identical": {
+      "feature_names": true,
+      "n_features": true,
+      "definition": true,
+      "source_dataset_sha256": true,
+      "manifest_version": true,
+      "row_id_definition": true,
+      "tolerances": true
+    },
+    "X_sha256_identical_to_committed_report": {
+      "train": true,
+      "val": true,
+      "test": true
+    },
+    "X_sha256": {
+      "train": "be4300ddb929bcb7173f1d2473b794ea832f60560bee53e3557f1ebfd3e6ef70",
+      "val": "a0daf8b1564787c4b2eb9164d9bd23d2696960078e9b2bd83b9efb27a4b9bbeb",
+      "test": "3ab5249266df40a81e3a332baab0202153d39f4f3b131a8e43fe19ac1f824f1b"
+    }
+  },
+  "loaders": {
+    "ok": true,
+    "repeated_builds_identical": true,
+    "eval_streams_unaffected_by_noise": true,
+    "batch_order_unaffected_by_noise": true,
+    "settings": {
+      "seed": 42,
+      "batch_size": 256,
+      "noise_std": 0.1,
+      "noise_batches_hashed": 5
+    },
+    "fingerprint": {
+      "train_batch_order_sha256": "7c4f0b344a67035dddf505471bf5ad680d78ca216158344ded91df1c1d322c6a",
+      "train_noisy_input_sha256_first_batches": "43e24506cb76830fa2f2c8ec40b48133081e6fe1b472b00505fd6a26b3c74185",
+      "eval_streams_sha256": {
+        "val_legit": "a470f6bb46745e8a174c40dba14bffc0d7a331115d42a82a91acf25d1237ce6d",
+        "val_ranking": "f0e180253e30edfe9cd6219cc147609f3359c5fba0f187089724fbc3b205b135",
+        "test": "7cfc7b99353d4df346b8b1fefc58d744f5ce7262650b0c835f4453f76659b621"
+      },
+      "train_fraud_rows": 0
+    }
+  },
+  "reference_comparison": {
+    "ok": true,
+    "identical": {
+      "split_row_ids": true,
+      "loader_batch_order": true,
+      "loader_noise": true,
+      "feature_matrices_X": true
+    },
+    "reference": "data/reproducibility/reproducibility_report.json",
+    "reference_environment": {
+      "python": "3.9.6",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "numpy": "2.0.2",
+      "pandas": "2.3.3",
+      "scikit_learn": "1.6.1",
+      "joblib": "1.5.3",
+      "torch": "2.8.0"
+    }
+  },
+  "status": "PASSED"
+}
