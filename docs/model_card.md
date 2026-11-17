@@ -210,16 +210,17 @@ Source: [docs/autoencoder_methods_note.md](file:///Users/Abhi/Downloads/projects
 The model possesses six documented limitations that must be accounted for in system integration and evaluation:
 
 1. **Reconstruction False Negatives on Subtle Frauds:** Some fraudulent transactions have feature signatures closely aligned with legitimate spending patterns and reconstruct with low MSE error. The autoencoder measures distance from learned legitimate geometry, not fraudulent intent.  
-   *Source:* [docs/autoencoder_methods_note.md](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/docs/autoencoder_methods_note.md#L95-L96)
+   *Source:* [docs/autoencoder_methods_note.md](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/docs/autoencoder_methods_note.md#L95-L100), Section 5 (Limitations & Failure Modes)
 2. **Validation Split Prior Phase-1 Exposure:** The validation split was previously exposed during Phase 1 for exploratory threshold tuning and triage analysis. This prior exposure is disclosed in the pre-registered plan; the final holdout test evaluation in Issue #38 serves as the untainted final arbiter.  
    *Source:* [docs/ae_experiment_plan.md](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/docs/ae_experiment_plan.md#L190-L193)
 3. **Seed Variability:** Across random training initializations, validation AP exhibits a measured standard deviation of $\pm 0.0147$ ($\text{CV} = 4.5\%$, range $0.3116$ to $0.3409$). This variability is transparently reported and managed by freezing a confirmed closest-to-mean checkpoint.  
    *Source:* [results/ae_seed_stability.md](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/results/ae_seed_stability.md#L47-L58)
-4. **Dataset & Issuer Scope:** The model was trained and evaluated on 49 days of transactions from a single European card issuer (ULB dataset, September 2013). Generalization to other card products, merchant categories, geographical regions, or newer payment flows is untested.  
+4. **Dataset & Issuer Scope:** The model was trained and evaluated on transactions from September 2013 by a single European card issuer (ULB dataset). The frozen dataset's Time range spans 0 to 172,792 seconds (~2 days), per the split manifest. Generalization to other card products, merchant categories, geographical regions, or newer payment flows is untested.  
+   *Source:* [data/split_manifest.json](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/data/split_manifest.json) (time_range_seconds)  
    *Source:* [docs/Phase2_Data_Provenance_Split.md](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/docs/Phase2_Data_Provenance_Split.md#L1-L15)  
    *Source:* [docs/ae_experiment_plan.md](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/docs/ae_experiment_plan.md#L10-L18)
 5. **Validation Ranking Trails Baseline GMM:** On the shared validation split, the frozen autoencoder's validation AP ($0.3257$) currently trails the reproduced Phase 1 GMM baseline validation AP ($0.6510$). The final comparative verdict between the two anomaly detection approaches will be determined exclusively by the one-time paired test evaluation.  
-   *Source:* [results/phase2/gmm/tables/final_ranking_metrics.csv](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/results/phase2/gmm/tables/final_ranking_metrics.csv#L2)  
+   *Source:* [results/phase2/gmm/tables/final_ranking_metrics.csv](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/results/phase2/gmm/tables/final_ranking_metrics.csv) (validation row)  
    *Source:* [results/ae_seed_stability.md](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/results/ae_seed_stability.md#L48)
 6. **Realized Hidden Activation Stack (Addendum A1):** The realized network architecture uses `BatchNorm1d` + `LeakyReLU(negative_slope=0.1)` rather than the plain `ReLU` specified in the initial pre-registration document (Section 2), reflecting the team-merged implementation (#32). All experimental candidates shared this identical realized backbone.  
    *Source:* [docs/ae_experiment_plan.md](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/docs/ae_experiment_plan.md#L210-L214)
@@ -265,7 +266,7 @@ All artifacts supporting this model card are committed in the repository:
 |---|---|---|
 | **Frozen Experiment Plan** | [`docs/ae_experiment_plan.md`](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/docs/ae_experiment_plan.md) | Pre-registered experiment protocol and selection rules (includes Addendum A1) |
 | **Stage 1 Ablation Doc** | [`results/ae_ablations_stage1.md`](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/results/ae_ablations_stage1.md) | Empirical analysis and rule application for Stage 1 width/denoising search |
-| **Stage 1 Ablation Figure** | [`results/figures/ae_stage1_val_ap.png`](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/results/figures/ae_stage1_val_ap.png) | High-resolution plot of validation AP and Precision@100 across architectures |
+| **Stage 1 Ablation Figure** | [`results/figures/ae_stage1_val_ap.png`](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/results/figures/ae_stage1_val_ap.png) | Stage-1 ablation plot: validation AP across candidate architectures |
 | **Stage 2 Stability Doc** | [`results/ae_seed_stability.md`](file:///Users/Abhi/Downloads/projects/Card-Fraud-Triage-ML-DL/results/ae_seed_stability.md) | Multi-seed stability analysis, audit, and model freeze decision |
 
 ---
@@ -278,5 +279,5 @@ All artifacts supporting this model card are committed in the repository:
 | **Release Date** | 2026-11-17 |
 | **Author** | Abhigya Sachdeva (`@ABHIGYA0205`) |
 | **Role** | Anomaly Detection Modeling Lead |
-| **Downstream Consumer** | Somraj (`@Somraj`) — Issue #37 / Issue #44 (Validation Threshold Calibration) |
-| **Final Evaluation** | Issue #38 (Paired GMM vs. Autoencoder Holdout Test Evaluation) |
+| **Downstream Consumer** | Issue #62 — AE validation threshold calibration (@WizardCarp85) |
+| **Final Evaluation** | Issue #38 — Paired GMM vs Autoencoder holdout test evaluation (@somraj112) |
